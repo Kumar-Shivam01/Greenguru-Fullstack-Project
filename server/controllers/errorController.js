@@ -1,4 +1,4 @@
-const CustomError = require('./../utils/CustomError');
+const CustomError = require('../utils/CustomError');
 require('dotenv').config()
 
 const castErrorHandler=(err)=>{
