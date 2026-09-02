@@ -40,3 +40,28 @@ exports.register = asyncErrorHandler(async (req, res) => {
         }
     })
 })
+exports.login = asyncErrorHandler(async(req,res)=>{
+    const {email,password} = req.body;
+    if(!email || !password){
+        return next(new CustomError('Please provide you email and password for login.', 400))
+    }
+    const user = await User.findOne({email}).select('+password')
+    if(!user || !(await user.comparePassword(password,user.password))){
+        return next(new CustomError('Incorrect email or password.', 401))
+    }
+    const token = signToken(user._id);
+    res.cookie('rememberme',token,{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' ? true : false,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        maxAge: ms(process.env.JWT_EXPIRE)
+    })
+    res.status(200).json({
+        status: 'success',
+        data:{
+            id: user._id,
+            name: user.name,
+            email: user.email
+        }
+    })
+})

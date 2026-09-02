@@ -56,7 +56,7 @@ userSchema.pre('save',async function(){
     this.password = await bcrypt.hash(this.password,12); //encrypting the password using bcrypt
 })
 //method to compare password
-userSchema.methods.comparePasswordInDB = async function(pswd,pswdInDB){
+userSchema.methods.comparePassword = async function(pswd,pswdInDB){
     return await bcrypt.compare(pswd,pswdInDB)
 }
 const User = mongoose.models.user || mongoose.model('User',userSchema)
