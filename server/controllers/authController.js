@@ -3,6 +3,7 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler')
 const CustomError = require('../utils/CustomError')
 const jwt = require('jsonwebtoken')
 const ms = require('ms')
+const sendEmail = require('./../config/email')
 require('dotenv').config();
 
 const signToken = (id) => {
@@ -24,6 +25,11 @@ exports.register = asyncErrorHandler(async (req, res) => {
         secure: process.env.NODE_ENV === 'production' ? true : false,
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // important for cookies to work in different domains
         maxAge: ms(process.env.JWT_EXPIRE)
+    })
+    await sendEmail({
+        email: email,
+        subject: 'Welcome to GreenGuru',
+        message: `Welcome to GreenGuru. Your account has been created with the email id: ${email}`
     })
     res.status(201).json({
         status: 'success',
