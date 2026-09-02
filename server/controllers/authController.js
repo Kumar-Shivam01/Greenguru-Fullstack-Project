@@ -13,13 +13,11 @@ const signToken = (id) => {
 }
 exports.register = asyncErrorHandler(async (req, res) => {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-        return next(new CustomError('Please provide you name, email and password for signup.', 400))
-    }
+    if (!name || !email || !password) return next(new CustomError('Please provide you name, email and password for signup.', 400))
+
     const existingUser = User.findOne({ email });
-    if (existingUser) {
-        return next(new CustomError('User already exists. Please login.', 400))
-    }
+    if (existingUser) return next(new CustomError('User already exists. Please login.', 400))
+
     const user = await User.create(req.body);
     const token = signToken(user._id)
     res.cookie('rememberme', token, {
@@ -28,11 +26,13 @@ exports.register = asyncErrorHandler(async (req, res) => {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // important for cookies to work in different domains
         maxAge: ms(process.env.JWT_EXPIRE)
     })
+
     await sendEmail({
         email: email,
         subject: 'Welcome to GreenGuru',
         message: `Welcome to GreenGuru. Your account has been created with the email id: ${email}`
     })
+    
     res.status(201).json({
         status: 'success',
         data:{
@@ -44,13 +44,12 @@ exports.register = asyncErrorHandler(async (req, res) => {
 })
 exports.login = asyncErrorHandler(async(req,res)=>{
     const {email,password} = req.body;
-    if(!email || !password){
-        return next(new CustomError('Please provide you email and password for login.', 400))
-    }
+    if(!email || !password) return next(new CustomError('Please provide you email and password for login.', 400))
+
     const user = await User.findOne({email}).select('+password')
-    if(!user || !(await user.comparePassword(password,user.password))){
-        return next(new CustomError('Incorrect email or password.', 401))
-    }
+    if(!user || !(await user.comparePassword(password,user.password))) 
+    return next(new CustomError('Incorrect email or password.', 401))
+    
     const token = signToken(user._id);
     res.cookie('rememberme',token,{
         httpOnly: true,
@@ -58,6 +57,7 @@ exports.login = asyncErrorHandler(async(req,res)=>{
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         maxAge: ms(process.env.JWT_EXPIRE)
     })
+
     res.status(200).json({
         status: 'success',
         data:{
@@ -80,9 +80,8 @@ exports.logout = asyncErrorHandler(async(req,res)=>{
 })
 exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
      const user = await User.findById(req.userId)
-     if(user.isAccountVerified){
-        return next(new CustomError('Your account is already verified.'))
-     }
+     if(user.isAccountVerified) return next(new CustomError('Your account is already verified.'))
+
      const otp = crypto.randomInt(100000,999999);
      user.verifyOtp = otp;
      user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000;
@@ -99,16 +98,12 @@ exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
 })
 exports.verifyAccount = asyncErrorHandler(async(req,res)=>{
     const {otp} = req.body;
-    if(!req.userId || !otp){
-        return next(new CustomError('Missing user details or otp.', 400))
-    }
+    if(!req.userId || !otp) return next(new CustomError('Missing user details or otp.', 400))
+
     const user = await User.findById(req.userId);
-    if(!user || user.verifyOtp !== otp){
-        return next(new CustomError('User not found or otp is incorrect.', 401))
-    }
-    if(user.verifyOtpExpireAt < Date.now()){
-        return next(new CustomError('Otp is expired. Please resend the otp.'))
-    }
+    if(!user || user.verifyOtp !== otp) return next(new CustomError('User not found or otp is incorrect.', 401))
+    if(user.verifyOtpExpireAt < Date.now()) return next(new CustomError('Otp is expired. Please resend the otp.'))
+
     user.isAccountVerified = true
     user.verifyOtp = ''
     user.verifyOtpExpireAt = 0
@@ -121,9 +116,7 @@ exports.verifyAccount = asyncErrorHandler(async(req,res)=>{
 })
 exports.sendResetPasswordOtp = asyncErrorHandler(async(req,res)=>{
     const {email} = req.body;
-    if(!email || !validator.isEmail(email)){
-        return next(new CustomError('Please provide a valid email',400))
-    }
+    if(!email || !validator.isEmail(email)) return next(new CustomError('Please provide a valid email',400))
     const user = await User.findOne({email})
     if(!user) return next(new CustomError('User not found',404))
     const otp = crypto.randomInt(100000,999999)
@@ -139,5 +132,26 @@ exports.sendResetPasswordOtp = asyncErrorHandler(async(req,res)=>{
     res.status(200).json({
         status: 'success',
         message: 'Password reset code sent to your email'
+    })
+})
+//Reset user password
+exports.resetPassword = asyncErrorHandler(async (req,res)=>{
+    const {email,newPassword,otp} = req.body;
+    if(!email || !newPassword || !otp) return next(new CustomError('please provide email, newPassword and otp.',400))
+
+    const user = await User.findOne({email})
+    if(!user) return next(new CustomError('User not found.',404))
+    if(user.resetOtp !== otp) return next(new CustomError('otp is incorrect.'))
+    if(user.resetOtpExpireAt < Date.now()) return next(new CustomError('Otp is expired. Please resend the otp.'))
+    
+    user.password = newPassword,
+    user.resetOtp = '',
+    user.resetOtpExpireAt = 0
+    user.passwordChangedAt = Date.now()
+
+    await user.save()
+    res.status(200).json({
+        status: 'success',
+        message: 'Password reset successfully. You can now login with your new password.'
     })
 })
