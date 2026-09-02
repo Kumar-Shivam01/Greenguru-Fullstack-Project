@@ -7,10 +7,16 @@ const validator = require('validator')
 const crypto = require('crypto')
 const sendEmail = require('./../config/email')
 require('dotenv').config();
+const {EMAIL_VERIFY_TEMPLATE, RESET_PASSWORD_TEMPLATE} = require('./../utils/emailTemplates')
+
+const renderEmailTemplate=(template, values)=>(
+    Object.entries(values).reduce((html,[placeholder, value])=>html.replaceAll(`{{${placeholder}}}`,String(value)),template)
+)
 
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET_STR, { expiresIn: process.env.JWT_EXPIRE })
 }
+
 exports.register = asyncErrorHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return next(new CustomError('Please provide you name, email and password for signup.', 400))
@@ -32,7 +38,7 @@ exports.register = asyncErrorHandler(async (req, res) => {
         subject: 'Welcome to GreenGuru',
         message: `Welcome to GreenGuru. Your account has been created with the email id: ${email}`
     })
-    
+
     res.status(201).json({
         status: 'success',
         data:{
@@ -89,7 +95,14 @@ exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
      await sendEmail({
         email: user.email,
         subject: 'Verify your account on GreenGuru',
-        message: `Your verification code is ${otp}, and it will expire in 10 minutes. Please do not share this code with anyone.`
+        message: `Your verification code is ${otp}, and it will expire in 10 minutes. Please do not share this code with anyone.`,
+        html:renderEmailTemplate(EMAIL_VERIFY_TEMPLATE,{
+            otpCode: otp,
+            userName: user.name,
+            email: user.email,
+            expiryMinutes: 10,
+            currentYear: new Date().getFullYear()
+        })
      })
      res.status(200).json({
         status: 'success',
@@ -127,7 +140,14 @@ exports.sendResetPasswordOtp = asyncErrorHandler(async(req,res)=>{
     await sendEmail({
         email: user.email,
         subject: 'Reset password request for GreenGuru',
-        message: `Your password reset code is ${otp} and it will expire in 10 minutes. Do not share this code with anyone`
+        message: `Your password reset code is ${otp} and it will expire in 10 minutes. Do not share this code with anyone`,
+        html: renderEmailTemplate(RESET_PASSWORD_TEMPLATE,{
+            otpCode: otp,
+            userName: user.name,
+            email: user.email,
+            expiryMinutes: 10,
+            currentYear: new Date().getFullYear()
+        })
     })
     res.status(200).json({
         status: 'success',
