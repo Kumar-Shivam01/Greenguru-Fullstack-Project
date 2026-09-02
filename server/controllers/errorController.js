@@ -1,6 +1,27 @@
 const CustomError = require('../utils/CustomError');
 require('dotenv').config()
 
+const devErrors = (res,error)=>{
+    res.status(error.statusCode).json({
+        status:error.status,
+        error:error,
+        message:error.message,
+        stackTrace:error.stack
+    })
+}
+const prodError=(res,error)=>{
+    if(error.isOperational){ //all the errors which we are creating from our CustomError class are set to isOperational = true;
+        res.status(error.statusCode).json({
+            status:error.status,
+            message:error.message
+        })
+    }else{ //in case of other errors (database errors, programmer errors, etc.) we will send a generic error message.
+        res.status(500).json({
+            status:'error',
+            message:'Something went wrong! Please try again later.'
+        })
+    }
+}
 const castErrorHandler=(err)=>{
     const msg = `Invalid value for ${err.path}: ${err}!`
     return new CustomError(msg,400)
