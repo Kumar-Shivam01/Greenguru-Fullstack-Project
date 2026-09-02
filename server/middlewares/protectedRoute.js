@@ -4,7 +4,7 @@ const CustomError = require('../utils/CustomError')
 const User = require('../models/userModel')
 require('dotenv').config()
 
-exports.protectedRoute = asyncErrorHandler(async(req,res,next)=>{
+const protectedRoute = asyncErrorHandler(async(req,res,next)=>{
     let token;
     if(req.cookies.rememberme){
         token = req.cookies.rememberme;
@@ -20,3 +20,4 @@ exports.protectedRoute = asyncErrorHandler(async(req,res,next)=>{
     req.userId = currentUser.id; //setting a userId property to the req object so that it can be accessed by subsequent middlewares or route handlers.
     next();
 })
+module.exports = protectedRoute

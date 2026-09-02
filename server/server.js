@@ -1,12 +1,19 @@
 const express = require("express");
 const cookieParser = require('cookie-parser')
 const { default: mongoose } = require("mongoose");
+const authRouter = require('./routes/authRoutes')
+const userRouter = require('./routes/userRoutes')
+require('dotenv').config();
+
 const app = express();
-require('dotenv').config()
+
 app.use(express.json()); //for parsing the req.body
 app.use(cookieParser())
+
+app.use('/api/v1/auth',authRouter)
+app.use('/api/v1/user',userRouter)
 app.get('/', (req, res) => {
-    res.send('Hello from backend!')
+    res.send('GreenGuru API is running..')  
 })
 
  
