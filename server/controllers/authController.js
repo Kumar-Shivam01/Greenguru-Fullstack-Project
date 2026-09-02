@@ -65,3 +65,14 @@ exports.login = asyncErrorHandler(async(req,res)=>{
         }
     })
 })
+exports.logout = asyncErrorHandler(async(req,res)=>{
+    res.clearCookie('rememberme',{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' ? true : false,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    })
+    res.status(200).json({
+        status: 'success',
+        message: 'Logged out successfully'
+    })
+})
