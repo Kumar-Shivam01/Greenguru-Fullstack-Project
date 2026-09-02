@@ -17,6 +17,6 @@ exports.protectedRoute = asyncErrorHandler(async(req,res,next)=>{
     if(!currentUser){
         return next(new CustomError('The user belonging to this token does not exist.', 401))
     }
-    req.userId = currentUser.id;
+    req.userId = currentUser.id; //setting a userId property to the req object so that it can be accessed by subsequent middlewares or route handlers.
     next();
 })
