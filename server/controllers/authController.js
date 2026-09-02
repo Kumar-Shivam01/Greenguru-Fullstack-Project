@@ -96,3 +96,25 @@ exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
         message: 'Verification code sent successfully'
      })
 })
+exports.verifyOtp = asyncErrorHandler(async(req,res)=>{
+    const {otp} = req.body;
+    if(!req.userId || !otp){
+        return next(new CustomError('Missing user details or otp.', 400))
+    }
+    const user = await User.findById(req.userId);
+    if(!user || user.verifyOtp !== otp){
+        return next(new CustomError('User not found or otp is incorrect.', 401))
+    }
+    if(user.verifyOtpExpireAt < Date.now()){
+        return next(new CustomError('Otp is expired. Please resend the otp.'))
+    }
+    user.isAccountVerified = true
+    user.verifyOtp = ''
+    user.verifyOtpExpireAt = 0
+
+    await user.save()
+    res.status(200).json({
+        status: 'success',
+        message: 'Account verified successfully'
+    })
+})
