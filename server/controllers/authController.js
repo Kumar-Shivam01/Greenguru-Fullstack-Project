@@ -3,6 +3,7 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler')
 const CustomError = require('../utils/CustomError')
 const jwt = require('jsonwebtoken')
 const ms = require('ms')
+const validator = require('validator')
 const crypto = require('crypto')
 const sendEmail = require('./../config/email')
 require('dotenv').config();
@@ -88,15 +89,15 @@ exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
      await user.save();
      await sendEmail({
         email: user.email,
-        subject: 'Verify your account',
+        subject: 'Verify your account on GreenGuru',
         message: `Your verification code is ${otp}, and it will expire in 10 minutes. Please do not share this code with anyone.`
      })
      res.status(200).json({
         status: 'success',
-        message: 'Verification code sent successfully'
+        message: 'Account Verification code sent to your email'
      })
 })
-exports.verifyOtp = asyncErrorHandler(async(req,res)=>{
+exports.verifyAccount = asyncErrorHandler(async(req,res)=>{
     const {otp} = req.body;
     if(!req.userId || !otp){
         return next(new CustomError('Missing user details or otp.', 400))
@@ -112,9 +113,31 @@ exports.verifyOtp = asyncErrorHandler(async(req,res)=>{
     user.verifyOtp = ''
     user.verifyOtpExpireAt = 0
 
-    await user.save()
+    await user.save() 
     res.status(200).json({
         status: 'success',
         message: 'Account verified successfully'
+    })
+})
+exports.sendResetPasswordOtp = asyncErrorHandler(async(req,res)=>{
+    const {email} = req.body;
+    if(!email || !validator.isEmail(email)){
+        return next(new CustomError('Please provide a valid email',400))
+    }
+    const user = await User.findOne({email})
+    if(!user) return next(new CustomError('User not found',404))
+    const otp = crypto.randomInt(100000,999999)
+    user.resetOtp = otp
+    user.resetOtpExpireAt = Date.now()+10*60*1000
+
+    await user.save()
+    await sendEmail({
+        email: user.email,
+        subject: 'Reset password request for GreenGuru',
+        message: `Your password reset code is ${otp} and it will expire in 10 minutes. Do not share this code with anyone`
+    })
+    res.status(200).json({
+        status: 'success',
+        message: 'Password reset code sent to your email'
     })
 })
