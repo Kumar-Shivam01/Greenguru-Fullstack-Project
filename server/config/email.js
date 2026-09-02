@@ -13,7 +13,7 @@ const sendEmail = asyncErrorHandler(async (options)=>{
     })
     //email options creation
     const emailOptions = {
-        from: 'Auth support<support@GreenGuru.com>',
+        from: 'GreenGuru support<support@GreenGuru.com>',
         to: options.email,
         subject: options.subject,
         text: options.message,

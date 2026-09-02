@@ -3,6 +3,7 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler')
 const CustomError = require('../utils/CustomError')
 const jwt = require('jsonwebtoken')
 const ms = require('ms')
+const crypto = require('crypto')
 const sendEmail = require('./../config/email')
 require('dotenv').config();
 
@@ -75,4 +76,23 @@ exports.logout = asyncErrorHandler(async(req,res)=>{
         status: 'success',
         message: 'Logged out successfully'
     })
+})
+exports.sendVerifyOtp = asyncErrorHandler(async(req,res)=>{
+     const user = await User.findById(req.userId)
+     if(user.isAccountVerified){
+        return next(new CustomError('Your account is already verified.'))
+     }
+     const otp = crypto.randomInt(100000,999999);
+     user.verifyOtp = otp;
+     user.verifyOtpExpireAt = Date.now() + 10 * 60 * 1000;
+     await user.save();
+     await sendEmail({
+        email: user.email,
+        subject: 'Verify your account',
+        message: `Your verification code is ${otp}, and it will expire in 10 minutes. Please do not share this code with anyone.`
+     })
+     res.status(200).json({
+        status: 'success',
+        message: 'Verification code sent successfully'
+     })
 })
