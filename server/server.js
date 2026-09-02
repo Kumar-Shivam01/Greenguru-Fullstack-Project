@@ -10,13 +10,13 @@ const app = express();
 app.use(express.json()); //for parsing the req.body
 app.use(cookieParser())
 
-app.use('/api/v1/auth',authRouter)
-app.use('/api/v1/user',userRouter)
+app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/user', userRouter)
 app.get('/', (req, res) => {
-    res.send('GreenGuru API is running..')  
+    res.send('GreenGuru API is running..')
 })
 
- 
+
 const server = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_CONN_STR)
@@ -25,7 +25,7 @@ const server = async () => {
             console.log(`Server is running at http://localhost:${process.env.PORT}`)
         })
     } catch (error) {
-        console.log(error)
+        //console.log(error)
     }
 }
 server();
