@@ -54,6 +54,7 @@ const plantSchema = new mongoose.Schema({
     // ── Care Information (AI-populated via Gemini) ──
     careInfo: {
       waterFrequency: { type: String, default: null },  // "Every 7-10 days"
+      waterIntervalDays:  { type: Number, default: 7 },    // Used for dynamic countdown calculations!
       sunlight:       { type: String, default: null },   // "Bright indirect"
       soilType:       { type: String, default: null },   // "Well-draining"
       temperature:    { type: String, default: null },   // "18-27°C"
@@ -72,14 +73,27 @@ const plantSchema = new mongoose.Schema({
       enum: ["healthy", "needs-attention", "sick", "dormant"],
       default: "healthy",
     },
-    notes: {
-      type: String,
-      maxlength: 500,
+    aiObservation: {
+      type: String, // e.g., "Mild chlorosis detected on lower leaves."
       default: "",
     },
+    actionableFix: {
+      type: String, // e.g., "Allow soil to dry out before next watering."
+      default: "",
+    },
+    healthTimeline: [
+      { 
+        imageUrl:       { type: String, required: true },
+        healthStatus:   { type: String, enum: ["healthy", "needs-attention", "sick", "dormant"] },
+        aiObservation:  { type: String, default:"" },
+        actionableFix:  { type: String, default:"" },
+        recordedAt:     { type: Date, default: Date.now },
+      }
+    ],
     location: {
-      type: String,       // "Living room", "Balcony", "Garden"
-      default: null,
+      type: String,
+      enum: ["Indoors","Outdoors","Living room", "Balcony", "Garden","Other"],      
+      default: "Indoors",
     },
     dateAdded: {
       type: Date,
@@ -88,10 +102,6 @@ const plantSchema = new mongoose.Schema({
     lastWatered: {
       type: Date,
       default: null,
-    },
-    isArchived: {
-      type: Boolean,
-      default: false,
     },
   },
   {
