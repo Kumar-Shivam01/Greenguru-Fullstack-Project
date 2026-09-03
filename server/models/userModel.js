@@ -25,12 +25,10 @@ const userSchema = new mongoose.Schema({
     verifyOtp:{
         type: String,
         default: '',
-        select: false
     },
     verifyOtpExpireAt:{
         type: Number,
         default: 0,
-        select: false
     },
     isAccountVerified:{
         type: Boolean,
@@ -39,12 +37,10 @@ const userSchema = new mongoose.Schema({
     resetOtp:{
         type: String,
         default: '',
-        select: false
     },
     resetOtpExpireAt:{
         type: Number,
         default: 0,
-        select: false
     },
     passwordChangedAt:{
         type: Date,

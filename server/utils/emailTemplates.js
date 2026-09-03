@@ -43,7 +43,7 @@ exports.EMAIL_VERIFY_TEMPLATE = `<!DOCTYPE html>
           <tr>
             <td align="center" style="background-color:#4f46e5; padding:32px 20px;">
               <span style="font-family: Arial, Helvetica, sans-serif; font-size:22px; font-weight:bold; color:#ffffff;">
-                Auth
+                GreenGuru
               </span>
             </td>
           </tr>
@@ -166,7 +166,7 @@ exports.RESET_PASSWORD_TEMPLATE =`<!DOCTYPE html>
           <tr>
             <td align="center" style="background-color:#dc2626; padding:32px 20px;">
               <span style="font-family: Arial, Helvetica, sans-serif; font-size:22px; font-weight:bold; color:#ffffff;">
-                Auth
+                GreenGuru
               </span>
             </td>
           </tr>
