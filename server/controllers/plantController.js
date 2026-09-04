@@ -1,13 +1,23 @@
+const path = require('path');
 const CustomError = require('./../utils/CustomError')
 const cloudinaryService = require('./../services/cloudinaryService')
 const geminiService = require('./../services/geminiService')
 const asyncErrorHandler = require('./../utils/asyncErrorHandler')
 
-exports.identifyPlant = asyncErrorHandler(async (req, res, next) => {
+const identifyPlant = asyncErrorHandler(async (req, res, next) => {
     if (!req.file) return next(new CustomError("Please upload your plant image", 400))
 
     const fileBuffer = req.file.buffer;
-    const mimeType = req.file.mimetype;
+    let mimeType = req.file.mimetype;
+
+    // Fallback if client/Postman sends generic octet-stream
+    if (!mimeType || !mimeType.startsWith('image/')) {
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        if (ext === '.png') mimeType = 'image/png';
+        else if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+        else if (ext === '.webp') mimeType = 'image/webp';
+        else mimeType = 'image/jpeg';
+    }
 
     //1. Upload to cloud
     const cloudinaryResult = await cloudinaryService.uploadImage(fileBuffer);
