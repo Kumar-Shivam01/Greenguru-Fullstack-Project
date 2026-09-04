@@ -1,12 +1,11 @@
 const { GoogleGenAI } = require("@google/genai")
-const asyncErrorHandler = require("../utils/asyncErrorHandler")
 require('dotenv').config()
 
 const ai = new GoogleGenAI({ //creates gemini client
     apiKey: process.env.GEMINI_API_KEY
 })
 
-const analysePlantImage = asyncErrorHandler(async (fileBuffer, mimeType) => {
+const analysePlantImage = async (fileBuffer, mimeType) => {
     const prompt = `
 You are an expert botanist and plant-care specialist.
 
@@ -105,7 +104,7 @@ IMPORTANT:
 `;
     const imageBase64 = fileBuffer.toString('base64');
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.5-flash',
         contents: [
             {
                 role: "User",
@@ -131,7 +130,7 @@ IMPORTANT:
         .trim();
 
     return JSON.parse(cleanedText)
-})
+}
 
 module.exports = { analysePlantImage }
 
