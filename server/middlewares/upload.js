@@ -1,13 +1,18 @@
 const multer = require('multer');
-const CustomError = require('./../utils/CustomError')
+const path = require('path');
+const CustomError = require('./../utils/CustomError');
 
 const storage = multer.memoryStorage(); //stores images as buffer in memory, so after Multer processes the image we get req.file.buffer
 
-const fileFilter = (req,file,cb)=>{
-    if(file.mimetype.startWith("/image")){ //only allow images (like jpeg, png, gif, webp, and svg)
-        cb(null,true);
-    }else{  //reject the file and return an error
-        cb(new CustomError('Only image files are allowed!',400),false)
+const fileFilter = (req, file, cb) => {
+    const ext = file && file.originalname ? path.extname(file.originalname).toLowerCase() : '';
+    const isImageExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'].includes(ext);
+    const isImageMime = file && file.mimetype && file.mimetype.startsWith("image/");
+
+    if (isImageMime || isImageExt) {
+        cb(null, true);
+    } else {
+        cb(new CustomError('Only image files are allowed!', 400), false);
     }
 }
 
@@ -17,6 +22,6 @@ const upload = multer({ //Multer instance with storage, fileFilter and limits
     limits: {
         fileSize: 5 * 1024 * 1024 //5mb limit
     }
-})
+}) 
 
 module.exports = upload
