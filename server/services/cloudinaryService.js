@@ -1,4 +1,4 @@
-const cloudinary = require('cloudinary')
+const cloudinary = require('../config/cloudinary')
 
 //To take an image buffer from Multer (req.file.buffer) and upload it to Cloudinary
 const uploadImage = (buffer)=>{
@@ -16,4 +16,4 @@ const uploadImage = (buffer)=>{
         uploadStream.end(buffer)
     })
 }
-module.exports = uploadImage
+module.exports = {uploadImage}
