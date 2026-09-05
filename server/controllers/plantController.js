@@ -63,3 +63,98 @@ exports.identifyPlant = asyncErrorHandler(async (req, res, next) => {
         },
     })
 })
+
+//It receives the already-generated imageUrl and AI data from the frontend and persists the final plant.
+exports.createPlant = asyncErrorHandler(async (req,res,next)=>{
+    const userId = req.userId;
+    //get user from protected route
+    if(!userId){
+        return next(new CustomError("User not authenticated",401))
+    }
+    //get required fields from req.body
+    const {
+        nickname,
+        imageUrl,
+
+        // AI identification
+            commonName,
+            scientificName,
+            species,
+            family,
+            aiConfidence,
+            identificationStatus,
+
+            // Care information
+            careInfo,
+
+            // Health information
+            healthStatus,
+            aiObservation,
+            actionableFix,
+
+            // User-provided fields
+            location,
+            lastWatered, 
+    } = req.body
+    // validate required fields
+    if(!nickname || !nickname.trim()){
+        return next(new CustomError('Please give your plant a nickname',400))
+    }
+    const healthTimeline = [];
+    if(healthStatus){
+        healthTimeline.push({
+            imageUrl,
+            healthStatus,
+            aiObservation: aiObservation || "",
+            actionableFix: actionableFix || "",
+            recordedAt: new Date(),
+        })
+    }
+     // Construct plant document
+    const plant = {
+        user: userId,
+
+        //user-provided
+        nickname: nickname.trim(),
+        imageUrl,
+        location,
+        lastWatered: lastWatered || null,
+
+        //AI identification
+        commonName: commonName || null,
+        scientificName: scientificName || null,
+        species: species || null,
+        family: family || null,
+        aiConfidence: aiConfidence !== undefined ? aiConfidence : null, 
+        identificationStatus: identificationStatus || "pending",
+
+        //AI Care Info
+        careInfo:{
+            waterFrequency: careInfo?.waterFrequency || null,
+            waterIntervalDays: careInfo?.waterIntervalDays ?? 7,
+            sunlight: careInfo?.sunlight || null,
+            soilType: careInfo?.soilType || null,
+            temperature: careInfo?.temperature || null,
+            humidity: careInfo?.humidity || null,
+            toxicity: careInfo?.toxicity || null,
+            difficulty: careInfo?.difficulty || null,
+        },
+        //AI health information
+        healthStatus: healthStatus || "healthy",
+        aiObservation: aiObservation || "",
+        actionableFix: actionableFix || "",
+
+        //Initial health record
+        healthTimeline
+    }
+    //save plant to mongoDB
+    const createdPlant = await Plant.create(plant)
+
+    //return created plant
+    return res.status(201).json({
+        success: true,
+        data: {
+            createdPlant
+        },
+    })
+})
