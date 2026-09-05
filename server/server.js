@@ -11,7 +11,6 @@ require('dotenv').config();
 const app = express();
 app.use(express.json()); //for parsing the req.body
 app.use(cookieParser())
-app.use(globalErrorHandler)
 
 // Rate limiting middleware
 app.use('/api', apiLimiter);
@@ -34,9 +33,10 @@ const server = async () => {
             console.log(`Server is running at http://localhost:${process.env.PORT}`)
         })
     } catch (error) {
-        //console.log(error)
+       //console.log(error)
     }
 }
 server();
 
 
+ 

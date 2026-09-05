@@ -41,6 +41,7 @@ exports.register = asyncErrorHandler(async (req, res,next) => {
 
     res.status(201).json({
         status: 'success',
+        token,
         data: {
             id: user._id,
             name: user.name,
@@ -66,6 +67,7 @@ exports.login = asyncErrorHandler(async (req, res,next) => {
 
     res.status(200).json({
         status: 'success',
+        token,
         data: {
             id: user._id,
             name: user.name,
