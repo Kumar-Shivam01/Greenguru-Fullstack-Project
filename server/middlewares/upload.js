@@ -9,7 +9,7 @@ const fileFilter = (req, file, cb) => {
     const isImageExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'].includes(ext);
     const isImageMime = file && file.mimetype && file.mimetype.startsWith("image/");
 
-    if (isImageMime || isImageExt) {
+    if (isImageMime || isImageExt) { //returns true if image
         cb(null, true);
     } else {
         cb(new CustomError('Only image files are allowed!', 400), false);
@@ -18,7 +18,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ //Multer instance with storage, fileFilter and limits
     storage,
-    fileFilter,
+    fileFilter, //filefilter contains file validation logic eg. checking if it's an image, reject if not
     limits: {
         fileSize: 5 * 1024 * 1024 //5mb limit
     }
