@@ -172,26 +172,58 @@ exports.getMyPlants = asyncErrorHandler(async (req,res,next)=>{
             sort = "newest"
         } = req.query
 
-        //base filter
-        const filter = { user: userId } // Only return plants belonging to the logged-in user
+           // 3. Allowed enum values
+        const allowedLocations = [
+            "Indoors",
+            "Outdoors",
+            "Living room",
+            "Balcony",
+            "Garden",
+            "Other",
+        ];
+
+        const allowedHealthStatuses = [
+            "healthy",
+            "needs-attention",
+            "sick",
+            "dormant",
+        ];
+
+        const allowedSorts = [
+            "newest",
+            "lastWatered",
+        ];
+        //add location filter
+        if(location && !allowedLocations.includes(location)){ 
+            return next(new CustomError(`Invalid location. Allowed values: ${allowedLocations.join(", ")}`,400))
+        }
+
+        //add health status filter 
+        if(healthStatus && !allowedHealthStatuses.includes(healthStatus)){
+            return next(new CustomError(`Invalid health status. Allowed values: ${allowedHealthStatuses.join(", ")}`,400))
+        }
+
+        // Validate sort parameter 
+        if (!allowedSorts.includes(sort)) {
+            return next(new CustomError(`Invalid sort value. Allowed values: ${allowedSorts.join(", ")}`,400))
+        }
+        
+        const filter = {user: userId}
 
         //add location filter
-        if(location && location.trim()){ 
-            filter.location = location
-        }
+        if(location) filter.location = location
 
         //add health status filter
-        if(healthStatus && healthStatus.trim()){
-            filter.healthStatus = healthStatus
-        }
+        if(healthStatus) filter.healthStatus = healthStatus
+
         //Search nickname or commonName
-        if(search){
+        if(search && search.trim()){
             filter.$or = [ //Match by nickname or commonName
                 {
-                    nickname: { $regex: search, $options: "i"} //"i" makes search case-insensitive
+                    nickname: { $regex: search.trim(), $options: "i"} //"i" makes search case-insensitive
                 },
                 {
-                    commonName: { $regex: search, $options: "i"}
+                    commonName: { $regex: search.trim(), $options: "i"}
                 },
                 
             ]
