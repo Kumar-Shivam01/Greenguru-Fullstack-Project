@@ -318,4 +318,18 @@ exports.waterPlant = asyncErrorHandler(async(req,res,next)=>{
         }
     })
 })
+exports.deletePlant = asyncErrorHandler(async(req,res,next)=>{
+    const {userId} = req
+    const plantId = req.params.id
 
+    if(!userId) return next(new CustomError('User not authenticated',401))
+    const deletePlant = await Plant.findOneAndDelete({
+        _id: plantId,
+        user: userId
+    })
+    if(!deletePlant) return next(new CustomError('Plant not found',404))
+    return res.status(200).json({
+        success:true,
+        message: "Plant deleted successfully!",
+    })
+})
