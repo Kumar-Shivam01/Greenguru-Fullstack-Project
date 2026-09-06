@@ -11,4 +11,5 @@ plantRouter.route('/:id').get(protectedRoute,plantController.getPlantById)
 plantRouter.route('/:id').patch(protectedRoute,plantController.updatePlant)
 plantRouter.route('/:id/water').patch(protectedRoute,plantController.waterPlant)
 plantRouter.route('/:id').delete(protectedRoute,plantController.deletePlant)
+plantRouter.route('/:id/checkin').post(protectedRoute,upload.single("image"),plantController.addHealthCheckin)
 module.exports = plantRouter 
