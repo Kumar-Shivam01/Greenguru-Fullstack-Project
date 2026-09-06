@@ -8,4 +8,5 @@ plantRouter.route('/identify').post(protectedRoute,upload.single("image"),plantC
 plantRouter.route('/').post(protectedRoute,plantController.createPlant)
 plantRouter.route('/').get(protectedRoute,plantController.getMyPlants)
 plantRouter.route('/:id').get(protectedRoute,plantController.getPlantById)
+plantRouter.route('/:id').patch(protectedRoute,plantController.updatePlant)
 module.exports = plantRouter 
