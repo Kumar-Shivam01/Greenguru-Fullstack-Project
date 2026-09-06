@@ -296,3 +296,26 @@ exports.updatePlant = asyncErrorHandler(async(req,res,next)=>{
     })
 
 })
+
+exports.waterPlant = asyncErrorHandler(async(req,res,next)=>{
+    const {userId} = req;
+    const plantId = req.params.id;
+
+    if(!userId) return next(new CustomError('User not authenticated',401))
+    const plant = await Plant.findOne({
+        _id: plantId,
+        user: userId
+    })
+    if(!plant) return next(new CustomError("Plant not found",404))
+    plant.lastWatered = new Date();
+    
+    await plant.save();
+    return res.status(200).json({
+        status: 'success',
+        message: 'Plant watered successfully!',
+        data:{
+            lastWatered: plant.lastWatered
+        }
+    })
+})
+
