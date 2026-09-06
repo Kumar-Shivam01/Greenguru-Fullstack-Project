@@ -333,3 +333,50 @@ exports.deletePlant = asyncErrorHandler(async(req,res,next)=>{
         message: "Plant deleted successfully!",
     })
 })
+exports.addHealthCheckin = asyncErrorHandler(async(req,res,next)=>{
+    const {userId} = req;
+    const plantId = req.params.id
+    if(!userId) return next(new CustomError('User not authenticated',401))
+    if(!req.file) return next(new CustomError('Please upload a photo',400))
+    
+    //find plant and verify ownership
+    const plant = await Plant.findOne({
+        _id: plantId,
+        user: userId
+    })
+    if(!plant) return next(new CustomError('Plant not found',404))  
+    
+    //upload new picture to cloudinary
+    const cloudinaryResult = await cloudinaryService.uploadImage(req.file.buffer)
+    const newImageUrl = cloudinaryResult.secure_url
+
+    //call AI to analyze the image
+    const aiResult = await geminiService.analyzePlantHealth( // using the 2nd (health checkup prompt)
+        req.file.buffer, req.file.mimetype, plant.scientificName
+    )
+
+    //create new health timeline entry
+    const timelineEntry={
+        imageUrl: newImageUrl,
+        healthStatus: aiResult.healthStatus,
+        aiObservation: aiResult.aiObservation,
+        actionableFix: aiResult.actionableFix,
+        recordedAt: new Date()
+    }
+    plant.healthTimeline.push(timelineEntry)
+    
+    //update current/latest health state
+    plant.healthStatus= aiResult.healthStatus
+    plant.aiObservation = aiResult.aiObservation
+    plant.actionableFix = aiResult.actionableFix
+    
+    await plant.save(); //save plant 
+    //return a response
+    return res.status(200).json({
+        success: true,
+        data:{
+            timelineEntry: plant.healthTimeline[plant.healthTimeline.length - 1],
+            plant
+        }
+    })
+})
