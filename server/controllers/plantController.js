@@ -245,4 +245,15 @@ exports.getMyPlants = asyncErrorHandler(async (req,res,next)=>{
                 plants,
             },
         })
-})  
+})
+
+exports.getPlantById = asyncErrorHandler(async (req,res,next)=>{
+     const plant = await Plant.findOne({_id: req.params.id,user: req.userId});
+     if(!plant) return next(new CustomError("Plant not found",404))
+     return res.status(200).json({
+        success:true,
+        data:{
+            plant
+        }
+     })  
+})
