@@ -257,3 +257,42 @@ exports.getPlantById = asyncErrorHandler(async (req,res,next)=>{
         }
      })  
 })
+exports.updatePlant = asyncErrorHandler(async(req,res,next)=>{
+    const {userId} = req;
+    const plantId = req.params.id;
+    if(!userId) return next(new CustomError('User not authenticated',401));
+    const {nickname, location, lastWatered} = req.body;
+
+    //Create update object
+    const updates = {};
+
+    if(nickname !== undefined){
+        if(!nickname.trim()){
+            return next(new CustomError('Please give your plant a nickname.',400));
+        }
+        updates.nickname = nickname.trim();
+    }
+    //add location filter
+    if(location !== undefined){
+        updates.location = location;
+    }
+
+    if(lastWatered !== undefined){
+        updates.lastWatered = lastWatered
+    }
+    const updatedPlant = await Plant.findOneAndUpdate({ //"Find this plant only if it belongs to this logged-in user."
+        _id : plantId,
+        user: userId
+    },updates,{new: true, runValidators: true})
+    
+    if(!updatedPlant){
+        return next(new CustomError("No plant found",404));
+    }
+    return res.status(200).json({
+        success: true,
+        data: {
+            updatedPlant
+        }
+    })
+
+})
