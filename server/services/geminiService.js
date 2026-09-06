@@ -132,5 +132,113 @@ IMPORTANT:
     return JSON.parse(cleanedText)
 }
 
-module.exports = { analysePlantImage }
+const analyzePlantHealth = async (
+    fileBuffer,
+    mimeType,
+    scientificName
+) => {
+    const prompt = `
+You are an expert plant health diagnostic assistant.
+
+Analyze the uploaded plant image and determine the plant's CURRENT HEALTH CONDITION.
+
+The plant was previously identified as:
+${scientificName || "Unknown"}
+
+Use the previous scientific name only as contextual information.
+Do NOT blindly assume that the previous identification is correct.
+Inspect the uploaded image yourself.
+
+Your task is ONLY to assess the plant's current health.
+
+Return ONLY valid JSON.
+Do not include markdown.
+Do not include code fences.
+Do not include explanations outside the JSON.
+
+The JSON must have EXACTLY these fields:
+
+{
+  "healthStatus": "healthy | needs-attention | sick | dormant",
+  "aiObservation": "string",
+  "actionableFix": "string"
+}
+
+Rules:
+
+1. healthStatus:
+   - "healthy" = plant appears healthy with no significant visible problems.
+   - "needs-attention" = mild or moderate visible issues that should be addressed.
+   - "sick" = significant signs of disease, severe stress, pest damage, or serious health problems.
+   - "dormant" = plant appears to be in a normal dormant/resting state.
+
+2. aiObservation:
+   - Describe what you can actually observe in the image.
+   - Mention visible symptoms such as yellowing, browning, wilting, spots,
+     pest damage, leaf drop, discoloration, poor growth, or healthy new growth.
+   - Do not invent symptoms that are not visible.
+   - Keep the observation concise and useful to the user.
+
+3. actionableFix:
+   - Give practical immediate care advice based on the visible symptoms.
+   - If the plant appears healthy, recommend continuing the current care routine.
+   - Do not give overly specific treatment instructions when the image does not
+     provide enough evidence to determine the exact cause.
+
+4. If the image does not clearly contain a plant or the image quality is too poor
+   to assess its health reliably:
+   - Set "healthStatus" to "needs-attention".
+   - Explain the limitation in "aiObservation".
+   - Give a reasonable action in "actionableFix", such as asking the user to
+     provide a clearer photo.
+
+5. Do not return:
+   - commonName
+   - scientificName
+   - species
+   - family
+   - careInfo
+   - aiConfidence
+   - identificationStatus
+   - nickname
+   - imageUrl
+   - location
+   - lastWatered
+   - healthTimeline
+
+Return ONLY the three requested health-analysis fields.
+`;
+
+    const imageBase64 = fileBuffer.toString("base64");
+    const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: [
+            {
+                role: "User",
+                parts: [
+                    {
+                        text: prompt,
+                    },
+                    {
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: imageBase64,
+                        },
+                    },
+                ],
+            },
+        ],
+    });
+
+    const text = response.text.trim();
+    const cleanedText = text
+        .replace(/^```json/, "")
+        .replace(/^```/, "")
+        .replace(/```$/, "")
+        .trim();
+
+    return JSON.parse(cleanedText);
+};
+
+module.exports = { analysePlantImage,analyzePlantHealth }
 
