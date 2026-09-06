@@ -9,4 +9,5 @@ plantRouter.route('/').post(protectedRoute,plantController.createPlant)
 plantRouter.route('/').get(protectedRoute,plantController.getMyPlants)
 plantRouter.route('/:id').get(protectedRoute,plantController.getPlantById)
 plantRouter.route('/:id').patch(protectedRoute,plantController.updatePlant)
+plantRouter.route('/:id/water').patch(protectedRoute,plantController.waterPlant)
 module.exports = plantRouter 
