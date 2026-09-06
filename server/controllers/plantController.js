@@ -158,3 +158,59 @@ exports.createPlant = asyncErrorHandler(async (req,res,next)=>{
         },
     })
 })
+
+exports.getMyPlants = asyncErrorHandler(async (req,res,next)=>{
+        // Get authenticated user's ID
+       const userId = req.userId;
+       if(!userId) return next(new CustomError('User not authenticated',401))
+       
+        //Get query params
+        const {
+            location,
+            healthStatus,
+            search,
+            sort = "newest"
+        } = req.query
+
+        //base filter
+        const filter = { user: userId } // Only return plants belonging to the logged-in user
+
+        //add location filter
+        if(location && location.trim()){ 
+            filter.location = location
+        }
+
+        //add health status filter
+        if(healthStatus && healthStatus.trim()){
+            filter.healthStatus = healthStatus
+        }
+        //Search nickname or commonName
+        if(search){
+            filter.$or = [ //Match by nickname or commonName
+                {
+                    nickname: { $regex: search, $options: "i"} //"i" makes search case-insensitive
+                },
+                {
+                    commonName: { $regex: search, $options: "i"}
+                },
+                
+            ]
+        }
+        // decide sorting
+        let sortOption;
+        if(sort === "lastWatered")
+            sortOption = {lastWatered: -1} //1 for ascending
+        else
+            //default new plants first
+            sortOption = {createdAt: -1};
+
+        const plants = await Plant.find(filter).sort(sortOption)
+        //return response
+        return res.status(200).json({
+            success: true,
+            count: plants.length,
+            data: {
+                plants,
+            },
+        })
+})  
