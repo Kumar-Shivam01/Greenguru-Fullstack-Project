@@ -7,4 +7,5 @@ const upload = require('../middlewares/upload')
 plantRouter.route('/identify').post(protectedRoute,upload.single("image"),plantController.identifyPlant)   
 plantRouter.route('/').post(protectedRoute,plantController.createPlant)
 plantRouter.route('/').get(protectedRoute,plantController.getMyPlants)
-module.exports = plantRouter
+plantRouter.route('/:id').get(protectedRoute,plantController.getPlantById)
+module.exports = plantRouter 
