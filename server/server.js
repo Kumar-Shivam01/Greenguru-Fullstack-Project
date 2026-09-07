@@ -6,9 +6,14 @@ const userRouter = require('./routes/userRoutes')
 const plantRouter = require('./routes/plantRoutes')
 const { apiLimiter } = require('./middlewares/rateLimiter')
 const globalErrorHandler = require('./controllers/errorController')
+const cors = require('cors')
 require('dotenv').config();
 
 const app = express();
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 app.use(express.json()); //for parsing the req.body
 app.use(cookieParser())
 
