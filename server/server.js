@@ -17,7 +17,7 @@ app.use('/api', apiLimiter);
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
-app.use('/api/v1/plant',plantRouter)
+app.use('/api/v1/plants',plantRouter)
 app.get('/', (req, res) => {
     res.send('GreenGuru API is running..')
 })
