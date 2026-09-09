@@ -16,7 +16,12 @@ function AppRoutes() {
 
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Protected routes */}
+      <Route element={<ProtectedRoute />}> //acts as a wrapper for everything that require authentication
+        <Route //protected route
+          path="/garden"
+          element={<TestDashboard />}
+        />
+      </Route> 
       <Route element={<ProtectedRoute />}>
 
         {/* We'll add these later */}
@@ -26,6 +31,15 @@ function AppRoutes() {
       </Route>
 
     </Routes>
+  );
+}
+function TestDashboard() {
+  return (
+    <div className="p-10">
+      <h1 className="text-3xl font-semibold">
+        Protected Dashboard
+      </h1>
+    </div>
   );
 }
 
