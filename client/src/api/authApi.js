@@ -16,7 +16,11 @@ export const logout = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const response = await axiosClient.get("/auth/me");
+  const response = await axiosClient.get("/auth/me",{
+    headers: {
+        "Cache-control": "no-cache"
+    }
+  });
   return response.data;
 };
 export const sendVerifyOtp = async()=>{

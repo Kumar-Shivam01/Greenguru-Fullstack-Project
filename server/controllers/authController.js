@@ -179,6 +179,7 @@ exports.getCurrentUser = asyncErrorHandler(async(req,res,next)=>{
     const user = await User.findById(req.userId).select('-password')
     if(!user) return next(new CustomError('User not found',404))
 
+    res.set('Cache-control','no-store')
     return res.status(200).json({
         status: 'success',
         data: user
