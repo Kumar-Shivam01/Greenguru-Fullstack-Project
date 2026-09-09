@@ -213,6 +213,7 @@ function MyGardenPage() {
                             key={plant._id}
                             plant={plant}
                             onWater={(id) => waterMutation.mutate(id)}
+                            isWatering={waterMutation.isPending}
                         />
                     ))}
                 </div>

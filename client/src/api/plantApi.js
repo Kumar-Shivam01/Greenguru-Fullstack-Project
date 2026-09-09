@@ -11,13 +11,12 @@ export const getMyPlants = async (params = {}) => {
 export const getPlantById = async (id) => {
     const response = await axiosClient.get(`/plants/${id}`);
 
-    return response.data;
+    return response.data.data.plant;
 };
 
 export const waterPlant = async (id, wateredDate) => {
-    const response = await axiosClient.patch(`/plants/${id}/water`, {
-        wateredDate,
-    });
+    const response = await axiosClient.patch(`/plants/${id}/water`,
+        wateredDate ? { wateredDate } : {});
 
     return response.data;
 };
