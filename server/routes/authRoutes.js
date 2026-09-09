@@ -4,7 +4,7 @@ const controller = require('./../controllers/authController')
 const { authLimiter, otpLimiter } = require('./../middlewares/rateLimiter')
 const router = express.Router()
 
-router.routej('/register').post(authLimiter, controller.register)
+router.route('/register').post(authLimiter, controller.register)
 router.route('/login').post(authLimiter, controller.login)
 router.route('/logout').get(controller.logout)
 router.route('/send-verify-otp').post(protectedRoute, otpLimiter, controller.sendVerifyOtp)
