@@ -1,9 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-
+import MyGardenPage from "../pages/MyGardenPage";
+import LogPlantPage from "../pages/LogPlantPage";
+import ProfilePage from "../pages/ProfilePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProtectedRoute from "../routes/protectedRoutes";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 function AppRoutes() {
   return (
@@ -21,12 +24,16 @@ function AppRoutes() {
           path="/garden"
           element={<TestDashboard />}
         />
-      </Route> 
-      <Route element={<ProtectedRoute />}>
+      </Route>
+      <Route element={
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      }>
 
-        {/* We'll add these later */}
-        {/* <Route path="/garden" element={<MyGardenPage />} /> */}
-        {/* <Route path="/plants/log" element={<LogPlantPage />} /> */}
+        <Route path="/garden" element={<MyGardenPage />} />
+        <Route path="/plants/new" element={<LogPlantPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
 
       </Route>
 
