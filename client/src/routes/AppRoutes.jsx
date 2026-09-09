@@ -7,7 +7,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProtectedRoute from "../routes/protectedRoutes";
 import DashboardLayout from "../components/layout/DashboardLayout";
-
+import PlantInfoPage from './../pages/PlantInfoPage'
 function AppRoutes() {
   return (
     <Routes>
@@ -23,7 +23,8 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/garden" element={<MyGardenPage />} />
-            <Route path="/plants/new" element={<LogPlantPage />} />
+            <Route path="/plants/:id" element={<PlantInfoPage />} />
+            <Route path="/plants/new" element={<LogPlantPage />}/>
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
