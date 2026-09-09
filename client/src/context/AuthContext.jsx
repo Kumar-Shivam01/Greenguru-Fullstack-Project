@@ -10,38 +10,41 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let cancelled = false;
     const checkAuth = async () => {
-      try {
-        const response = await getCurrentUser();
-        if (cancelled) return;
-        if (response.status === "success") {
-          setUser(response.data);
+        try {
+          const response = await getCurrentUser();
+          if (cancelled) return;
+          // If the API returns a wrapped object with .data use it, otherwise use the response directly
+          const userData = response?.data ?? response;
+          setUser(userData);
+        } catch (error) {
+          if (cancelled) return;
+          console.error("Auth check failed:", error);
+          setUser(null);
+        } finally {
+          if (!cancelled) setLoading(false);
         }
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Auth check failed:", error);
-        console.error("Auth check response:", error.response?.data);
-        setUser(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
     };
     checkAuth();
     return () => { cancelled = true; };
   }, []);
 
   const login = async (credentials) => {
-    const response = await loginApi(credentials)
-    if (response.status === 'success') setUser(response.data)
-    return response
-  }
+    const response = await loginApi(credentials);
+    if (response.status === 'success') {
+      setUser(response.data);
+      setLoading(false);
+    }
+    return response;
+  };
 
   const logout = async () => {
     try {
-      await logoutApi()
+      await logoutApi();
     } finally {
-      setUser(null)
+      setUser(null);
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <AuthContext.Provider
