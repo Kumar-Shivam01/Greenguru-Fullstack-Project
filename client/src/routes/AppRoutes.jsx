@@ -19,23 +19,14 @@ function AppRoutes() {
 
       <Route path="/register" element={<RegisterPage />} />
 
-      <Route element={<ProtectedRoute />}> //acts as a wrapper for everything that require authentication
-        <Route //protected route
-          path="/garden"
-          element={<TestDashboard />}
-        />
-      </Route>
-      <Route element={
-        <ProtectedRoute>
-          <DashboardLayout />
-        </ProtectedRoute>
-      }>
-
-        <Route path="/garden" element={<MyGardenPage />} />
-        <Route path="/plants/new" element={<LogPlantPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-
-      </Route>
+      {/* Protected routes wrapped with authentication and layout */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/garden" element={<MyGardenPage />} />
+            <Route path="/plants/new" element={<LogPlantPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
+        </Route>
 
     </Routes>
   );
