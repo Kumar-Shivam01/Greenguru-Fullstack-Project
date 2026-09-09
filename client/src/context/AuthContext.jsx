@@ -1,43 +1,49 @@
-import { createContext, useContext, useState,useEffect } from 'react'
-import {login as loginApi, logout as logoutApi,getCurrentUser} from '../api/authApi'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { login as loginApi, logout as logoutApi, getCurrentUser } from '../api/authApi'
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }){
-    const [user,setUser] = useState(null);
-    const [loading,setLoading] = useState(false);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(()=>{
-        checkAuth()
-    },[])
-
+  useEffect(() => {
+    let cancelled = false;
     const checkAuth = async () => {
-    try {
-      const response = await getCurrentUser();
-
-      setUser(response.data.data); //depends on the actualJSON structure returned by your login controller
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }; 
-
-    const login = async(credentials)=>{
-      const response = await loginApi(credentials)
-      setUser(response.data.user)
-      return response
-    }
-
-    const logout = async()=>{
-        try{
-          await logoutApi()
-        }finally{
-          setUser(null)
+      try {
+        const response = await getCurrentUser();
+        if (cancelled) return;
+        if (response.status === "success") {
+          setUser(response.data);
         }
-    }
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Auth check failed:", error);
+        console.error("Auth check response:", error.response?.data);
+        setUser(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    checkAuth();
+    return () => { cancelled = true; };
+  }, []);
 
-    return (
+  const login = async (credentials) => {
+    const response = await loginApi(credentials)
+    if (response.status === 'success') setUser(response.data)
+    return response
+  }
+
+  const logout = async () => {
+    try {
+      await logoutApi()
+    } finally {
+      setUser(null)
+    }
+  }
+
+  return (
     <AuthContext.Provider
       value={{
         user,
@@ -48,8 +54,8 @@ export function AuthProvider({ children }){
     >
       {children}
     </AuthContext.Provider>
-  ); 
+  );
 }
-export function useAuth(){
-    return useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
 }
