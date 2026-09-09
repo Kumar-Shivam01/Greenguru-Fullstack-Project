@@ -175,3 +175,12 @@ exports.resetPassword = asyncErrorHandler(async (req, res,next) => {
         message: 'Password reset successfully. You can now login with your new password.'
     })
 })
+exports.getCurrentUser = asyncErrorHandler(async(req,res,next)=>{
+    const user = await User.findById(req.userId).select('-password')
+    if(!user) return next(new CustomError('User not found',404))
+
+    return res.status(200).json({
+        status: 'success',
+        data: user
+    })
+})
