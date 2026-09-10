@@ -26,3 +26,15 @@ export const deletePlant = async (id) => {
 
     return response.data;
 };
+export const checkPlantHealth = async (id, imageFile) => {
+    const formData = new FormData();
+
+    formData.append("image", imageFile);
+
+    const response = await axiosClient.post(
+        `/plants/${id}/checkin`,
+        formData
+    );
+
+    return response.data;
+};
