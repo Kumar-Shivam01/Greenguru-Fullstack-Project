@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getPlantById, waterPlant,checkPlantHealth } from "../api/plantApi";
+import {
+    getPlantById,
+    waterPlant,
+    checkPlantHealth,
+    updatePlant,
+    analyzeReidentification,
+    confirmReidentification,
+} from "../api/plantApi";
 import { useState } from "react";
 import {
     FiArrowLeft,
@@ -20,6 +27,7 @@ import {
     FiClock,
     FiTarget,
     FiAperture,
+    FiRefreshCw,
 } from "react-icons/fi";
 
 function getHealthStyles(status) {
@@ -114,6 +122,20 @@ function PlantInfoPage() {
     const [showCheckinModal, setShowCheckinModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewUrl, setPreviewUrl] = useState("");
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showReidentifyModal, setShowReidentifyModal] = useState(false);
+    const [reidentifyImage, setReidentifyImage] = useState(null);
+    const [reidentifyPreviewUrl, setReidentifyPreviewUrl] = useState("");
+    const [reidentifyResult, setReidentifyResult] = useState(null);
+
+    const [editForm, setEditForm] = useState({
+        nickname: "",
+        commonName: "",
+        scientificName: "",
+        location: "",
+        lastWatered: "",
+    });
+
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -150,6 +172,39 @@ function PlantInfoPage() {
             console.error("Check-in failed:", error);
         }
     });
+    const updateMutation = useMutation({
+        mutationFn: () => updatePlant(id, editForm),
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["plant", id],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["plants"],
+            });
+
+            setShowEditModal(false);
+        },
+
+        onError: (error) => {
+            console.error("Plant update failed:", error);
+        },
+    });
+    const reidentifyMutation = useMutation({
+        mutationFn: (imageFile) => analyzeReidentification(id, imageFile),
+        onSuccess: (analysis) => setReidentifyResult(analysis),
+        onError: (error) => console.error("Re-identification failed:", error),
+    });
+    const confirmReidentifyMutation = useMutation({
+        mutationFn: () => confirmReidentification(id, reidentifyResult),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["plant", id] });
+            queryClient.invalidateQueries({ queryKey: ["plants"] });
+            closeReidentifyModal();
+        },
+        onError: (error) => console.error("Re-identification update failed:", error),
+    });
     const handleImageSelect = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -166,15 +221,10 @@ function PlantInfoPage() {
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
     };
-    const closeCheckinModal = () => {
-        setShowCheckinModal(false);
-        setSelectedImage(null);
+    const handleUpdatePlant = (event) => {
+        event.preventDefault();
 
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-        }
-
-        setPreviewUrl("");
+        updateMutation.mutate();
     };
     const handleCheckin = () => {
         console.log("ANALYZE BUTTON CLICKED");
@@ -187,7 +237,68 @@ function PlantInfoPage() {
 
         checkinMutation.mutate(selectedImage);
     };
+    const handleReidentifyImageSelect = (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
+        if (!file.type.startsWith("image/")) {
+            alert("Please select an image file.");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Please choose an image smaller than 5 MB.");
+            return;
+        }
+
+        if (reidentifyPreviewUrl) URL.revokeObjectURL(reidentifyPreviewUrl);
+        setReidentifyImage(file);
+        setReidentifyPreviewUrl(URL.createObjectURL(file));
+        setReidentifyResult(null);
+    };
+    const closeReidentifyModal = () => {
+        setShowReidentifyModal(false);
+        setReidentifyImage(null);
+        setReidentifyResult(null);
+        if (reidentifyPreviewUrl) URL.revokeObjectURL(reidentifyPreviewUrl);
+        setReidentifyPreviewUrl("");
+    };
+    const handleReidentify = () => {
+        if (reidentifyImage) reidentifyMutation.mutate(reidentifyImage);
+    };
+    const handleEditChange = (event) => {
+        const { name, value } = event.target;
+
+        setEditForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+    const openEditModal = () => {
+        if (!plant) return;
+
+        setEditForm({
+            nickname: plant.nickname || "",
+            commonName: plant.commonName || "",
+            scientificName: plant.scientificName || "",
+            location: plant.location || "",
+            lastWatered: plant.lastWatered
+                ? new Date(plant.lastWatered).toISOString().split("T")[0]
+                : "",
+        });
+
+        setShowEditModal(true);
+    };
+    const closeCheckinModal = () => {
+        setShowCheckinModal(false);
+        setSelectedImage(null);
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setPreviewUrl("");
+    };
     if (isLoading) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
@@ -247,7 +358,7 @@ function PlantInfoPage() {
                 </button>
 
                 <div className="flex items-center gap-2.5">
-                    <button className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-amber-200 hover:text-amber-600 hover:bg-amber-50 transition-all">
+                    <button onClick={openEditModal} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-amber-200 hover:text-amber-600 hover:bg-amber-50 transition-all">
                         <FiEdit className="h-4.5 w-4.5" />
                     </button>
                     <button className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all">
@@ -289,6 +400,15 @@ function PlantInfoPage() {
                             </span>
                             {formatStatus(plant.healthStatus)}
                         </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowReidentifyModal(true)}
+                            className="absolute right-6 top-6 inline-flex items-center gap-2 rounded-xl bg-white/90 px-4 py-2.5 text-sm font-bold text-[#31553b] shadow-lg backdrop-blur-sm transition hover:bg-white"
+                        >
+                            <FiRefreshCw size={16} />
+                            Re-identify
+                        </button>
 
                         <div className="absolute left-6 bottom-6 right-6 lg:left-8 lg:bottom-8 lg:right-8 flex items-end justify-between text-white">
                             <div className="flex items-center gap-2.5">
@@ -905,6 +1025,301 @@ function PlantInfoPage() {
 
                         </div>
 
+                    </div>
+                </div>
+            )}
+            {showReidentifyModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-[#1d2c21]/50 p-4 backdrop-blur-sm"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget && !reidentifyMutation.isPending && !confirmReidentifyMutation.isPending) {
+                            closeReidentifyModal();
+                        }
+                    }}
+                >
+                    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-[#dfe7dc] bg-white shadow-2xl">
+                        <div className="flex items-start justify-between border-b border-[#e7ebe5] px-6 py-5">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#89948b]">
+                                    Refresh AI information
+                                </p>
+                                <h2 className="mt-1 text-xl font-semibold text-[#26352a]">
+                                    Re-identify {plant.nickname || plant.commonName || "plant"}
+                                </h2>
+                                <p className="mt-1 text-sm text-[#7a857d]">
+                                    Upload a new photo to refresh its image, identification, care, and health information.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeReidentifyModal}
+                                disabled={reidentifyMutation.isPending || confirmReidentifyMutation.isPending}
+                                className="rounded-lg p-2 text-[#7d887f] transition hover:bg-[#f2f5f1] hover:text-[#35453a] disabled:opacity-50"
+                                aria-label="Close re-identify plant"
+                            >
+                                <FiX size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-5 p-6">
+                            {!reidentifyPreviewUrl ? (
+                                <label className="flex min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#ccd8ca] bg-[#f8faf7] px-6 text-center transition hover:border-[#719079] hover:bg-[#f3f7f2]">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e7f0e5] text-[#52745a]">
+                                        <FiUploadCloud size={25} />
+                                    </div>
+                                    <p className="mt-5 text-sm font-semibold text-[#405047]">Choose a clear plant photo</p>
+                                    <p className="mt-2 text-xs leading-5 text-[#89938c]">Show the leaves, stems, and overall shape. Maximum file size: 5 MB.</p>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleReidentifyImageSelect}
+                                        disabled={reidentifyMutation.isPending}
+                                    />
+                                </label>
+                            ) : (
+                                <>
+                                    <div className="relative overflow-hidden rounded-2xl bg-[#edf2eb]">
+                                        <img src={reidentifyPreviewUrl} alt="New plant photo" className="max-h-[340px] w-full object-cover" />
+                                        {!reidentifyMutation.isPending && !reidentifyResult && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    URL.revokeObjectURL(reidentifyPreviewUrl);
+                                                    setReidentifyImage(null);
+                                                    setReidentifyPreviewUrl("");
+                                                }}
+                                                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70"
+                                                aria-label="Remove selected image"
+                                            >
+                                                <FiX size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {reidentifyResult && (
+                                        <div className="space-y-4 rounded-2xl border border-[#dfe6da] bg-[#f7faf5] p-5">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#718071]">New identification</p>
+                                                    <h3 className="mt-1 text-xl font-semibold text-[#26352a]">{reidentifyResult.commonName || "Plant not identified"}</h3>
+                                                    {reidentifyResult.scientificName && <p className="mt-1 text-sm italic text-[#718071]">{reidentifyResult.scientificName}</p>}
+                                                </div>
+                                                {reidentifyResult.aiConfidence !== null && reidentifyResult.aiConfidence !== undefined && (
+                                                    <span className="rounded-full bg-[#e3f0df] px-3 py-1.5 text-xs font-bold text-[#31553b]">{Math.round(reidentifyResult.aiConfidence * 100)}% confidence</span>
+                                                )}
+                                            </div>
+                                            <div className="grid gap-3 text-sm sm:grid-cols-2">
+                                                <p><span className="font-semibold text-[#405047]">Health:</span> {formatStatus(reidentifyResult.healthStatus)}</p>
+                                                <p><span className="font-semibold text-[#405047]">Watering:</span> {reidentifyResult.careInfo?.waterFrequency || "Not available"}</p>
+                                                <p><span className="font-semibold text-[#405047]">Sunlight:</span> {reidentifyResult.careInfo?.sunlight || "Not available"}</p>
+                                                <p><span className="font-semibold text-[#405047]">Family:</span> {reidentifyResult.family || "Not available"}</p>
+                                            </div>
+                                            {reidentifyResult.aiObservation && <p className="rounded-xl bg-white p-3 text-sm leading-6 text-[#59655b]">{reidentifyResult.aiObservation}</p>}
+                                            <p className="text-xs leading-5 text-[#718071]">Confirming replaces the photo and AI-generated identification, care, and health fields. Your nickname, location, and last-watered date stay unchanged. This does not create a health-check timeline entry.</p>
+                                        </div>
+                                    )}
+
+                                    {reidentifyMutation.isError && (
+                                        <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">We couldn't analyze this photo. Please try another clear plant photo.</p>
+                                    )}
+                                    {confirmReidentifyMutation.isError && (
+                                        <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">We couldn't update this plant. Please try again.</p>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col-reverse gap-3 border-t border-[#e7ebe5] bg-[#fafbf9] px-6 py-4 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={closeReidentifyModal}
+                                disabled={reidentifyMutation.isPending || confirmReidentifyMutation.isPending}
+                                className="rounded-xl px-5 py-2.5 text-sm font-semibold text-[#66736a] transition hover:bg-[#eef2ed] disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            {!reidentifyResult ? (
+                                <button
+                                    type="button"
+                                    onClick={handleReidentify}
+                                    disabled={!reidentifyImage || reidentifyMutation.isPending}
+                                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#31553b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#27452f] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <FiRefreshCw size={16} />
+                                    {reidentifyMutation.isPending ? "Analyzing..." : "Analyze photo"}
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => confirmReidentifyMutation.mutate()}
+                                    disabled={confirmReidentifyMutation.isPending}
+                                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#31553b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#27452f] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <FiCheck size={16} />
+                                    {confirmReidentifyMutation.isPending ? "Updating..." : "Confirm update"}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showEditModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-[#fbfaf6] p-6 shadow-2xl">
+
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-semibold text-[#26352a]">
+                                Edit plant
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[#718071]">
+                                Update your plant's personal details.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleUpdatePlant} className="space-y-5">
+
+                            {/* Nickname */}
+                            <div>
+                                <label
+                                    htmlFor="nickname"
+                                    className="mb-2 block text-sm font-medium text-[#334238]"
+                                >
+                                    Nickname
+                                </label>
+
+                                <input
+                                    id="nickname"
+                                    name="nickname"
+                                    type="text"
+                                    value={editForm.nickname}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-[#d9dfd4] bg-white px-4 py-3 outline-none transition focus:border-[#708b69]"
+                                />
+                            </div>
+
+                            {/* Common name */}
+                            <div>
+                                <label
+                                    htmlFor="commonName"
+                                    className="mb-2 block text-sm font-medium text-[#334238]"
+                                >
+                                    Common name
+                                </label>
+
+                                <input
+                                    id="commonName"
+                                    name="commonName"
+                                    type="text"
+                                    value={editForm.commonName}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-[#d9dfd4] bg-white px-4 py-3 outline-none transition focus:border-[#708b69]"
+                                />
+                            </div>
+
+                            {/* Scientific name */}
+                            <div>
+                                <label
+                                    htmlFor="scientificName"
+                                    className="mb-2 block text-sm font-medium text-[#334238]"
+                                >
+                                    Scientific name
+                                </label>
+
+                                <input
+                                    id="scientificName"
+                                    name="scientificName"
+                                    type="text"
+                                    value={editForm.scientificName}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-[#d9dfd4] bg-white px-4 py-3 italic outline-none transition focus:border-[#708b69]"
+                                />
+                            </div>
+
+                            {/* Location */}
+                            <div>
+                                <label
+                                    htmlFor="location"
+                                    className="mb-2 block text-sm font-medium text-[#334238]"
+                                >
+                                    Location
+                                </label>
+
+                                <select
+                                    id="location"
+                                    name="location"
+                                    value={editForm.location}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-[#d9dfd4] bg-white px-4 py-3 outline-none transition focus:border-[#708b69]"
+                                >
+                                    <option value="">Select location</option>
+                                    <option value="Indoors">Indoors</option>
+                                    <option value="Outdoors">Outdoors</option>
+                                    <option value="Living room">Living room</option>
+                                    <option value="Balcony">Balcony</option>
+                                    <option value="Garden">Garden</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            {/* Last watered */}
+                            <div>
+                                <label
+                                    htmlFor="lastWatered"
+                                    className="mb-2 block text-sm font-medium text-[#334238]"
+                                >
+                                    Last watered
+                                </label>
+
+                                <input
+                                    id="lastWatered"
+                                    name="lastWatered"
+                                    type="date"
+                                    value={editForm.lastWatered}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-[#d9dfd4] bg-white px-4 py-3 outline-none transition focus:border-[#708b69]"
+                                />
+
+                                <p className="mt-2 text-xs text-[#7b877c]">
+                                    Use this if you need to correct the last watering date.
+                                </p>
+                            </div>
+
+                            {/* AI controlled notice */}
+                            <div className="rounded-2xl border border-[#dfe6da] bg-[#f1f5ed] p-4">
+                                <p className="text-sm font-medium text-[#3d513e]">
+                                    AI-managed information
+                                </p>
+
+                                <p className="mt-1 text-xs leading-5 text-[#718071]">
+                                    Plant care, health status, observations, and identification
+                                    information are managed by GreenGuru AI.
+                                </p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEditModal(false)}
+                                    className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#59655b] transition hover:bg-[#eef1eb]"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={updateMutation.isPending}
+                                    className="rounded-xl bg-[#496348] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#3d563c] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {updateMutation.isPending
+                                        ? "Saving..."
+                                        : "Save changes"}
+                                </button>
+                            </div>
+
+                        </form>
                     </div>
                 </div>
             )}
