@@ -38,3 +38,10 @@ export const checkPlantHealth = async (id, imageFile) => {
 
     return response.data;
 };
+export const updatePlant = async (id, updates) => {
+    const response = await axiosClient.patch(
+        `/plants/${id}`,
+        updates
+    )
+    return response.data;
+}
