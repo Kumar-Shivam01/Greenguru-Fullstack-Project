@@ -8,6 +8,7 @@ import RegisterPage from "../pages/RegisterPage";
 import ProtectedRoute from "../routes/protectedRoutes";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import PlantInfoPage from './../pages/PlantInfoPage'
+import PlantPreviewPage from "../pages/PlantPreviewPage";
 function AppRoutes() {
   return (
     <Routes>
@@ -25,6 +26,7 @@ function AppRoutes() {
             <Route path="/garden" element={<MyGardenPage />} />
             <Route path="/plants/:id" element={<PlantInfoPage />} />
             <Route path="/plants/new" element={<LogPlantPage />}/>
+            <Route path="/plants/new/preview" element={<PlantPreviewPage />}/>
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
