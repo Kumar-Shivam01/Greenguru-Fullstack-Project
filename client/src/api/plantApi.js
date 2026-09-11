@@ -45,3 +45,23 @@ export const updatePlant = async (id, updates) => {
     )
     return response.data;
 }
+export const analyzeReidentification = async (id, imageFile) => {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+
+    const response = await axiosClient.post(
+        `/plants/${id}/re-identify`,
+        formData
+    );
+
+    return response.data.data.analysis;
+};
+
+export const confirmReidentification = async (id, analysis) => {
+    const response = await axiosClient.post(
+        `/plants/${id}/re-identify/confirm`,
+        analysis
+    );
+
+    return response.data;
+};
