@@ -42,20 +42,30 @@ const AccountPage = () => {
 
             {/* Profile card */}
             <section className="rounded-2xl border border-[#e3e6df] bg-white p-6 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#dfe9df] text-xl font-semibold text-[#47634d]">
-                        {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#dfe9df] text-xl font-semibold text-[#47634d]">
+                            {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-semibold text-[#26352a]">
+                                {user?.name || "User"}
+                            </h2>
+
+                            <p className="mt-1 text-sm text-[#718077]">
+                                {user?.email}
+                            </p>
+                        </div>
                     </div>
 
-                    <div>
-                        <h2 className="text-lg font-semibold text-[#26352a]">
-                            {user?.name || "User"}
-                        </h2>
-
-                        <p className="mt-1 text-sm text-[#718077]">
-                            {user?.email}
-                        </p>
-                    </div>
+                    <button
+                        type="button"
+                        disabled
+                        className="rounded-xl border border-[#d7ddd5] px-4 py-2.5 text-sm font-medium text-[#8b958d] cursor-not-allowed"
+                    >
+                        Edit profile
+                    </button>
                 </div>
             </section>
 
