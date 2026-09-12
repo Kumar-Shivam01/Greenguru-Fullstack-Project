@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink,Link } from "react-router-dom";
 import {
     FiHome,
     FiPlus,
@@ -83,7 +83,7 @@ function Sidebar() {
                         👤 Account
                     </p>
 
-                    <NavLink to="/profile" className={linkClasses}>
+                    <NavLink to="/account" className={linkClasses}>
                         {({ isActive }) => (
                             <>
                                 <span className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
