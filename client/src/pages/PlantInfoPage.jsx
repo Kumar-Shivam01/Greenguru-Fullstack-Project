@@ -7,6 +7,7 @@ import {
     updatePlant,
     analyzeReidentification,
     confirmReidentification,
+    deletePlant
 } from "../api/plantApi";
 import { useState } from "react";
 import {
@@ -127,7 +128,7 @@ function PlantInfoPage() {
     const [reidentifyImage, setReidentifyImage] = useState(null);
     const [reidentifyPreviewUrl, setReidentifyPreviewUrl] = useState("");
     const [reidentifyResult, setReidentifyResult] = useState(null);
-
+    const [showDeleteModal, setShowDeleteModal] = useState(null)
     const [editForm, setEditForm] = useState({
         nickname: "",
         commonName: "",
@@ -191,6 +192,21 @@ function PlantInfoPage() {
             console.error("Plant update failed:", error);
         },
     });
+    const deleteMutation = useMutation({
+        mutationFn: () => deletePlant(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["plants"]
+            })
+            queryClient.removeQueries({
+                queryKey: ["plant", id]
+            })
+            navigate("/garden")
+        },
+        onError: (error) => {
+            console.error("Plant deletion failed", error)
+        }
+    })
     const reidentifyMutation = useMutation({
         mutationFn: (imageFile) => analyzeReidentification(id, imageFile),
         onSuccess: (analysis) => setReidentifyResult(analysis),
@@ -299,6 +315,9 @@ function PlantInfoPage() {
 
         setPreviewUrl("");
     };
+    const handleDeletePlant = () => {
+        deleteMutation.mutate()
+    }
     if (isLoading) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
@@ -361,7 +380,7 @@ function PlantInfoPage() {
                     <button onClick={openEditModal} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-amber-200 hover:text-amber-600 hover:bg-amber-50 transition-all">
                         <FiEdit className="h-4.5 w-4.5" />
                     </button>
-                    <button className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all">
+                    <button onClick={() => { setShowDeleteModal(true) }} className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 backdrop-blur-sm ring-1 ring-stone-200/60 text-stone-500 hover:ring-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all">
                         <FiTrash className="h-4.5 w-4.5" />
                     </button>
                 </div>
@@ -1320,6 +1339,50 @@ function PlantInfoPage() {
                             </div>
 
                         </form>
+                    </div>
+                </div>
+            )}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-md rounded-3xl bg-[#fbfaf6] p-6 shadow-2xl">
+
+                        <div className="mb-6">
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                                <FiTrash size={22} />
+                            </div>
+
+                            <h2 className="text-2xl font-semibold text-[#26352a]">
+                                Delete {plant.nickname || plant.commonName}?
+                            </h2>
+
+                            <p className="mt-2 text-sm leading-6 text-[#718071]">
+                                This will permanently remove this plant from your garden,
+                                including its health history.
+                            </p>
+                        </div>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(false)}
+                                disabled={deleteMutation.isPending}
+                                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#59655b] transition hover:bg-[#eef1eb] disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleDeletePlant}
+                                disabled={deleteMutation.isPending}
+                                className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {deleteMutation.isPending
+                                    ? "Deleting..."
+                                    : "Delete plant"}
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             )}
