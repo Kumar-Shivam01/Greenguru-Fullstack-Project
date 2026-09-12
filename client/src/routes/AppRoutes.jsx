@@ -9,6 +9,8 @@ import ProtectedRoute from "../routes/protectedRoutes";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import PlantInfoPage from './../pages/PlantInfoPage'
 import PlantPreviewPage from "../pages/PlantPreviewPage";
+import AccountPage from './../pages/AccountPage'
+
 function AppRoutes() {
   return (
     <Routes>
@@ -28,8 +30,9 @@ function AppRoutes() {
             <Route path="/plants/new" element={<LogPlantPage />}/>
             <Route path="/plants/new/preview" element={<PlantPreviewPage />}/>
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
-        </Route>
+        </Route> 
 
     </Routes>
   );
