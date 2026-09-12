@@ -9,7 +9,7 @@ const fileFilter = (req, file, cb) => {
     const isImageExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'].includes(ext);
     const isImageMime = file && file.mimetype && file.mimetype.startsWith("image/");
 
-    if (isImageMime || isImageExt) { //returns true if image
+    if (isImageMime && isImageExt) { //returns true if image
         cb(null, true);
     } else {
         cb(new CustomError('Only image files are allowed!', 400), false);
