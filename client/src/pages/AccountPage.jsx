@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserData, updateUserProfile } from "../api/userApi";
+import { getUserData, updateUserProfile, changePassword } from "../api/userApi";
 import { sendVerifyOtp, verifyAccount } from "../api/authApi";
 import { useEffect, useState } from "react";
 
@@ -10,6 +10,11 @@ const AccountPage = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [name, setName] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
+  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
   const queryClient = useQueryClient();
 
 
@@ -57,6 +62,30 @@ const AccountPage = () => {
       setProfileMsg(error?.response?.data?.message || "Unable to update your profile. Please try again.")
     }
   })
+  const changePasswordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: (data) => {
+      setPasswordMessage(data?.message || "Password changed successfully.")
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      setIsChangingPass(false)
+    },
+    onError: (error) => {
+      setPasswordMessage(error?.response.data.message || "Unable to change your password. Please try again.")
+    }
+  })
+  const handlePasswordChange = (event) => {
+    event.preventDefault();
+    setPasswordMessage("")
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage("New password do not match with the confirm password!")
+      return
+    }
+    changePasswordMutation.mutate({
+      currentPassword, newPassword
+    })
+  }
   const handleProfileUpdate = (event) => {
     event.preventDefault()
     setProfileMsg("")
@@ -83,7 +112,7 @@ const AccountPage = () => {
       setName(user.name)
     }
   }, [user?.name])
-  
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center ">
@@ -326,13 +355,111 @@ const AccountPage = () => {
         <p className="mt-2 text-sm text-[#718077]">
           Keep your GreenGuru account secure.
         </p>
+        
+        {
+          !isChangingPass &&
+          <button
+            type="button"
+            onClick={() => { setPasswordMessage(""); setIsChangingPass(true) }}
+            className="mt-5 rounded-xl border border-[#cfd8cf] px-4 py-2.5 text-sm font-medium text-[#405247] transition hover:bg-[#f5f7f3]">
+            Change password
+          </button>
+        }
 
-        <button
-          type="button"
-          className="mt-5 rounded-xl border border-[#cfd8cf] px-4 py-2.5 text-sm font-medium text-[#405247] transition hover:bg-[#f5f7f3]"
-        >
-          Change password
-        </button>
+        {isChangingPass && (
+          <form
+            onSubmit={handlePasswordChange}
+            className="mt-5 space-y-4 border-t border-[#e3e6df] pt-5"
+          >
+            <div>
+              <label
+                htmlFor="current-password"
+                className="text-sm font-medium text-[#344238]"
+              >
+                Current password
+              </label>
+
+              <input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                required
+                className="mt-2 w-full rounded-xl border border-[#cfd8cf] px-3 py-2.5 text-sm outline-none focus:border-[#49684f]"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="new-password"
+                className="text-sm font-medium text-[#344238]"
+              >
+                New password
+              </label>
+
+              <input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                required
+                minLength="8"
+                className="mt-2 w-full rounded-xl border border-[#cfd8cf] px-3 py-2.5 text-sm outline-none focus:border-[#49684f]"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirm-password"
+                className="text-sm font-medium text-[#344238]"
+              >
+                Confirm new password
+              </label>
+
+              <input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                required
+                minLength="8"
+                className="mt-2 w-full rounded-xl border border-[#cfd8cf] px-3 py-2.5 text-sm outline-none focus:border-[#49684f]"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={changePasswordMutation.isPending}
+                className="rounded-xl bg-[#49684f] px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {changePasswordMutation.isPending
+                  ? "Updating..."
+                  : "Update password"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsChangingPass(false)
+                  setCurrentPassword("")
+                  setNewPassword("")
+                  setConfirmPassword("")
+                  setPasswordMessage("")
+                }}
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#526b57] hover:bg-[#f5f7f3]"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {passwordMessage && (
+          <p className="mt-4 text-sm text-[#526b57]">
+            {passwordMessage}
+          </p>
+        )}
       </section>
     </div>
   );
