@@ -1,4 +1,6 @@
 import { NavLink,Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getUserData } from "../../api/userApi";
 import {
     FiHome,
     FiPlus,
@@ -10,6 +12,12 @@ import { useAuth } from "../../context/AuthContext";
 
 function Sidebar() {
     const { logout, user } = useAuth();
+    const {data} = useQuery({
+        queryKey: ["user"],
+        queryFn: getUserData
+    })
+    const userData = data?.data
+    const needsVerification = user?.isAccountVerified === false;
 
     const linkClasses = ({ isActive }) =>
         `group relative flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all duration-200 ${
@@ -25,7 +33,6 @@ function Sidebar() {
             <div className="flex h-24 items-center gap-4 border-b border-stone-200/60 px-7">
                 <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl gradient-hero text-white shadow-lg shadow-emerald-900/20">
                     <FiFeather className="h-6 w-6" />
-                    <div className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white" />
                 </div>
 
                 <div>
@@ -82,15 +89,15 @@ function Sidebar() {
                     <p className="px-4 mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400">
                         👤 Account
                     </p>
-
                     <NavLink to="/account" className={linkClasses}>
                         {({ isActive }) => (
-                            <>
+                            <>      
                                 <span className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                                     isActive ? "gradient-hero text-white shadow-md" : "bg-stone-100 text-stone-500 group-hover:bg-emerald-100 group-hover:text-emerald-700"
                                 }`}>
                                     <FiUser size={18} />
                                 </span>
+                                {needsVerification && <span className="pointer-events-none absolute top-6.5 left-30 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse"></span>}
                                 <span>Profile</span>
                                 {isActive && (
                                     <span className="ml-auto h-2 w-2 rounded-full bg-emerald-500" />
