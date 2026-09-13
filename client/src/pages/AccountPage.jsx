@@ -1,23 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserData,updateUserProfile } from "../api/userApi";
-import { useState } from "react";
+import { getUserData, updateUserProfile } from "../api/userApi";
 import { sendVerifyOtp, verifyAccount } from "../api/authApi";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 const AccountPage = () => {
   const [otp, setOtp] = useState("");
   const [showVerification, setShowVerification] = useState(false);
   const [message, setMessage] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [name,setName] = useState("");
-  const [profileMsg,setProfileMsg] = useState("");
+  const [name, setName] = useState("");
+  const [profileMsg, setProfileMsg] = useState("");
   const queryClient = useQueryClient();
 
-  useEffect(()=>{
-    if(user?.name){
-      setName(user.name)
-    }
-  },[user?.name])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["user"],
@@ -54,23 +48,23 @@ const AccountPage = () => {
   });
   const updateProfileMutation = useMutation({
     mutationFn: updateUserProfile,
-    onSuccess: (data)=>{
+    onSuccess: (data) => {
       setProfileMsg(data?.message || "Profile updated successfully")
       setIsEditingProfile(false)
-      queryClient.invalidateQueries({queryKey: ["user"]})
+      queryClient.invalidateQueries({ queryKey: ["user"] })
     },
-    onError: (error)=>{
+    onError: (error) => {
       setProfileMsg(error?.response?.data?.message || "Unable to update your profile. Please try again.")
     }
   })
-  const handleProfileUpdate = (event)=>{
+  const handleProfileUpdate = (event) => {
     event.preventDefault()
     setProfileMsg("")
-    if(!name.trim()){
+    if (!name.trim()) {
       setProfileMsg("Name connot be empty.")
       return
     }
-    updateProfileMutation.mutate({name})
+    updateProfileMutation.mutate({ name })
   }
 
   const handleVerifyAccount = (event) => {
@@ -84,6 +78,12 @@ const AccountPage = () => {
     verifyAccountMutation.mutate(otp.trim());
   };
   const user = data?.data;
+  useEffect(() => {
+    if (user?.name) {
+      setName(user.name)
+    }
+  }, [user?.name])
+  
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center ">
@@ -136,13 +136,62 @@ const AccountPage = () => {
 
           <button
             type="button"
-            disabled
-            className="rounded-xl border border-[#d7ddd5] px-4 py-2.5 text-sm font-medium text-[#8b958d] cursor-not-allowed"
+            onClick={() => { setProfileMsg(""); setIsEditingProfile(true) }}
+            className="rounded-xl border border-[#cfd8cf] px-4 py-2.5 text-sm font-medium text-[#405247] transition hover:bg-[#f5f7f3]"
           >
             Edit profile
           </button>
         </div>
       </section>
+      {isEditingProfile && (
+        <form
+          onSubmit={handleProfileUpdate}
+          className="mt-6 border-t border-[#e3e6df] pt-5"
+        >
+          <label
+            htmlFor="profile-name"
+            className="text-sm font-medium text-[#344238]"
+          >
+            Display name
+          </label>
+
+          <div className="mt-2 flex flex-col gap-3 sm:flex-row">
+            <input
+              id="profile-name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="w-full rounded-xl border border-[#cfd8cf] px-3 py-2.5 text-sm outline-none focus:border-[#49684f]"
+            />
+
+            <button
+              type="submit"
+              disabled={updateProfileMutation.isPending}
+              className="rounded-xl bg-[#49684f] px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setName(user?.name || "")
+                setIsEditingProfile(false)
+                setProfileMsg("")
+              }}
+              className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#526b57] hover:bg-[#f5f7f3]"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {profileMsg && (
+        <p className="mt-3 text-sm text-[#526b57]">
+          {profileMsg}
+        </p>
+      )}
 
       {/* Account information */}
       <section className="rounded-2xl border border-[#e3e6df] bg-white p-6 shadow-sm">
