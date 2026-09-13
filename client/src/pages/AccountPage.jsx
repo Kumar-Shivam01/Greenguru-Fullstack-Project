@@ -1,13 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserData } from "../api/userApi";
+import { getUserData,updateUserProfile } from "../api/userApi";
 import { useState } from "react";
 import { sendVerifyOtp, verifyAccount } from "../api/authApi";
+import { useEffect,useState } from "react";
 
 const AccountPage = () => {
   const [otp, setOtp] = useState("");
   const [showVerification, setShowVerification] = useState(false);
   const [message, setMessage] = useState("");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [name,setName] = useState("");
+  const [profileMsg,setProfileMsg] = useState("");
   const queryClient = useQueryClient();
+
+  useEffect(()=>{
+    if(user?.name){
+      setName(user.name)
+    }
+  },[user?.name])
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["user"],
@@ -42,6 +52,26 @@ const AccountPage = () => {
       );
     },
   });
+  const updateProfileMutation = useMutation({
+    mutationFn: updateUserProfile,
+    onSuccess: (data)=>{
+      setProfileMsg(data?.message || "Profile updated successfully")
+      setIsEditingProfile(false)
+      queryClient.invalidateQueries({queryKey: ["user"]})
+    },
+    onError: (error)=>{
+      setProfileMsg(error?.response?.data?.message || "Unable to update your profile. Please try again.")
+    }
+  })
+  const handleProfileUpdate = (event)=>{
+    event.preventDefault()
+    setProfileMsg("")
+    if(!name.trim()){
+      setProfileMsg("Name connot be empty.")
+      return
+    }
+    updateProfileMutation.mutate({name})
+  }
 
   const handleVerifyAccount = (event) => {
     event.preventDefault();
