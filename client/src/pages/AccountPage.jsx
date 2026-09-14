@@ -6,15 +6,16 @@ import { useEffect, useState } from "react";
 const AccountPage = () => {
   const [otp, setOtp] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-  const [message, setMessage] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const [verificationSuccess, setVerificationSuccess] = useState("");
   const [name, setName] = useState("");
-  const [profileMsg, setProfileMsg] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
 
@@ -28,43 +29,47 @@ const AccountPage = () => {
   const sendCodeMutation = useMutation({
     mutationFn: sendVerifyOtp,
     onSuccess: (data) => {
-      setMessage(data?.message || "Verification code sent to your email.");
+      setVerificationSuccess(data?.message || "Verification code sent to your email.");
+      setVerificationError("");
       setShowVerification(true);
     },
     onError: (error) => {
-      setMessage(
+      setVerificationError(
         error?.response?.data?.message ||
         "Unable to send a verification code. Please try again.",
       );
+      setVerificationSuccess("")
     },
   });
 
   const verifyAccountMutation = useMutation({
     mutationFn: verifyAccount,
     onSuccess: (data) => {
-      setPasswordSuccess(data?.message || "Account verified successfully.");
+      setVerificationSuccess(data?.message || "Account verified successfully.");
+      setVerificationError("")
       setOtp("");
       setShowVerification(false);
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
     onError: (error) => {
-      setPasswordError(
+      setVerificationError(
         error?.response?.data?.message ||
         "The verification code is invalid or expired.",
       );
-      setPasswordSuccess("")
+      setVerificationSuccess("")
     },
   });
   const updateProfileMutation = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (data) => {
-      setPasswordSuccess(data?.message || "Profile updated successfully")
+      setProfileSuccess(data?.message || "Profile updated successfully")
+      setProfileError("")
       setIsEditingProfile(false)
       queryClient.invalidateQueries({ queryKey: ["user"] })
     },
     onError: (error) => {
-      setPasswordError(error?.response?.data?.message || "Unable to update your profile. Please try again.")
-      setPasswordSuccess("")
+      setProfileError(error?.response?.data?.message || "Unable to update your profile. Please try again.")
+      setProfileSuccess("")
     }
   })
   const changePasswordMutation = useMutation({
@@ -96,10 +101,10 @@ const AccountPage = () => {
   }
   const handleProfileUpdate = (event) => {
     event.preventDefault()
-    setPasswordError("")
-    setPasswordSuccess("")
+    setProfileError("")
+    setProfileSuccess("")
     if (!name.trim()) {
-      setProfileMsg("Name connot be empty.")
+      setProfileError("Name connot be empty.")
       return
     }
     updateProfileMutation.mutate({ name })
@@ -107,10 +112,10 @@ const AccountPage = () => {
 
   const handleVerifyAccount = (event) => {
     event.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
+    setVerificationError("");
+    setVerificationSuccess("");
     if (!otp.trim()) {
-      setMessage("Please enter the verification code sent to your email.");
+      setVerificationError("Please enter the verification code sent to your email.");
       return;
     }
 
@@ -226,15 +231,15 @@ const AccountPage = () => {
         </form>
       )}
 
-      {passwordSuccess && (
+      {profileSuccess && (
         <p className="mt-4 text-sm text-emerald-700">
-          {passwordSuccess}
+          {profileSuccess}
         </p>
       )}
 
-      {passwordError && (
+      {profileError && (
         <p className="mt-4 text-sm text-red-600">
-          {passwordError}
+          {profileError}
         </p>
       )}
 
@@ -306,7 +311,8 @@ const AccountPage = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        setMessage("");
+                        setVerificationError("")
+                        setVerificationSuccess("")
                         sendCodeMutation.mutate();
                       }}
                       disabled={sendCodeMutation.isPending}
@@ -352,15 +358,15 @@ const AccountPage = () => {
                       </form>
                     )
                   }
-                  {passwordSuccess && (
-                    <p className="mt-4 text-sm text-emerald-700">
-                      {passwordSuccess}
+                  {verificationSuccess && (
+                    <p className="mt-3 text-sm text-emerald-700">
+                      {verificationSuccess}
                     </p>
                   )}
 
-                  {passwordError && (
-                    <p className="mt-4 text-sm text-red-600">
-                      {passwordError}
+                  {verificationError && (
+                    <p className="mt-3 text-sm text-red-600">
+                      {verificationError}
                     </p>
                   )}
                 </div>
