@@ -722,7 +722,7 @@ function PlantInfoPage() {
                         type="button"
                         disabled={waterMutation.isPending}
                         onClick={() => waterMutation.mutate()}
-                        className="group relative inline-flex items-center justify-center gap-3 rounded-3xl bg-white px-8 py-5 font-black text-base text-forest-800 shadow-2xl transition-all duration-200 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:-translate-y-1 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                        className="group relative inline-flex items-center justify-center gap-3 rounded-3xl bg-white text-green-800  px-8 py-5 font-black text-base shadow-2xl transition-all duration-200 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:-translate-y-1 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     >
                         {waterMutation.isPending ? (
                             <>
@@ -735,7 +735,7 @@ function PlantInfoPage() {
                         ) : (
                             <>
                                 <FiDroplet className="h-5.5 w-5.5 group-hover:scale-110 transition-transform" />
-                                Mark as watered
+                                Mark as watered 
                                 <FiCheck className="h-5 w-5 opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
                             </>
                         )}
