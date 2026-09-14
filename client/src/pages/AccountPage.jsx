@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserData, updateUserProfile, changePassword } from "../api/userApi";
 import { sendVerifyOtp, verifyAccount } from "../api/authApi";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const AccountPage = () => {
   const [otp, setOtp] = useState("");
@@ -18,7 +18,7 @@ const AccountPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
-
+  const [showPasswords, setShowPasswords] = useState(false)
   const queryClient = useQueryClient();
 
 
@@ -80,10 +80,11 @@ const AccountPage = () => {
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
+      setShowPasswords(false)
       setIsChangingPass(false)
     },
     onError: (error) => {
-      setPasswordError(error?.response.data.message || "Unable to change your password. Please try again.")
+      setPasswordError(error?.response?.data?.message || "Unable to change your password. Please try again.")
       setPasswordSuccess("")
     }
   })
@@ -122,12 +123,6 @@ const AccountPage = () => {
     verifyAccountMutation.mutate(otp.trim());
   };
   const user = data?.data;
-  useEffect(() => {
-    if (user?.name) {
-      setName(user.name)
-    }
-  }, [user?.name])
-
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center ">
@@ -180,7 +175,12 @@ const AccountPage = () => {
 
           <button
             type="button"
-            onClick={() => { setProfileMsg(""); setIsEditingProfile(true) }}
+            onClick={() => {
+              setName(user?.name || "")
+              setProfileError("")
+              setProfileSuccess("")
+              setIsEditingProfile(true)
+            }}
             className="rounded-xl border border-[#cfd8cf] px-4 py-2.5 text-sm font-medium text-[#405247] transition hover:bg-[#f5f7f3]"
           >
             Edit profile
@@ -221,7 +221,8 @@ const AccountPage = () => {
               onClick={() => {
                 setName(user?.name || "")
                 setIsEditingProfile(false)
-                setProfileMsg("")
+                setProfileError("")
+                setProfileSuccess("")
               }}
               className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#526b57] hover:bg-[#f5f7f3]"
             >
@@ -388,7 +389,11 @@ const AccountPage = () => {
           !isChangingPass &&
           <button
             type="button"
-            onClick={() => { setPasswordMessage(""); setIsChangingPass(true) }}
+            onClick={() => {
+              setPasswordError("")
+              setPasswordSuccess("")
+              setIsChangingPass(true)
+            }}
             className="mt-5 rounded-xl border border-[#cfd8cf] px-4 py-2.5 text-sm font-medium text-[#405247] transition hover:bg-[#f5f7f3]">
             Change password
           </button>
@@ -409,7 +414,7 @@ const AccountPage = () => {
 
               <input
                 id="current-password"
-                type="password"
+                type={showPasswords ? "text" : "password"}
                 value={currentPassword}
                 onChange={(event) => setCurrentPassword(event.target.value)}
                 required
@@ -427,7 +432,7 @@ const AccountPage = () => {
 
               <input
                 id="new-password"
-                type="password"
+                type={showPasswords ? "text" : "password"}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 required
@@ -446,7 +451,7 @@ const AccountPage = () => {
 
               <input
                 id="confirm-password"
-                type="password"
+                type={showPasswords ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
@@ -454,7 +459,15 @@ const AccountPage = () => {
                 className="mt-2 w-full rounded-xl border border-[#cfd8cf] px-3 py-2.5 text-sm outline-none focus:border-[#49684f]"
               />
             </div>
-
+            <label className="flex w-fit cursor-pointer items-center gap-2 text-sm text-[#526b57]">
+              <input
+                type="checkbox"
+                checked={showPasswords}
+                onChange={(event) => setShowPasswords(event.target.checked)}
+                className="h-4 w-4 accent-[#49684f]"
+              />
+              Show passwords
+            </label>
             <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
@@ -473,7 +486,9 @@ const AccountPage = () => {
                   setCurrentPassword("")
                   setNewPassword("")
                   setConfirmPassword("")
-                  setPasswordMessage("")
+                  setPasswordError("")
+                  setPasswordSuccess("")
+                  setShowPasswords(false)
                 }}
                 className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#526b57] hover:bg-[#f5f7f3]"
               >
