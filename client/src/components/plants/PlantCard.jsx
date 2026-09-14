@@ -49,7 +49,7 @@ function getConfidence(confidence) {
     if (confidence === undefined || confidence === null) return null;
     const value = Number(confidence);
     if (Number.isNaN(value)) return null;
-    return Math.round(Math.min(Math.max(value, 0), 100));
+    return Math.round(Math.min(Math.max(value, 0), 1) * 100);
 }
 
 function PlantCard({ plant, onWater, isWatering }) {
@@ -187,7 +187,7 @@ function PlantCard({ plant, onWater, isWatering }) {
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
                         ) : (
-                            <FiDroplet className="h-5 w-5 group-hover/btn:scale-110 group-hover/btn:-translate-y-0.5 transition-all duration-200" />
+                            <FiDroplet className="h-5 w-5 group-hover/btn:scale-110 group-hover/btn:-translate-y-0.5 transition-all duration-200" /> 
                         )}
                         <span className="pointer-events-none absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-sky-400 ring-2 ring-white animate-pulse" />
                     </button>
