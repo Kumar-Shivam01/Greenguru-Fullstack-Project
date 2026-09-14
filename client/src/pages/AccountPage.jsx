@@ -15,6 +15,9 @@ const AccountPage = () => {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
   const queryClient = useQueryClient();
 
 
@@ -39,48 +42,53 @@ const AccountPage = () => {
   const verifyAccountMutation = useMutation({
     mutationFn: verifyAccount,
     onSuccess: (data) => {
-      setMessage(data?.message || "Account verified successfully.");
+      setPasswordSuccess(data?.message || "Account verified successfully.");
       setOtp("");
       setShowVerification(false);
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
     onError: (error) => {
-      setMessage(
+      setPasswordError(
         error?.response?.data?.message ||
         "The verification code is invalid or expired.",
       );
+      setPasswordSuccess("")
     },
   });
   const updateProfileMutation = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (data) => {
-      setProfileMsg(data?.message || "Profile updated successfully")
+      setPasswordSuccess(data?.message || "Profile updated successfully")
       setIsEditingProfile(false)
       queryClient.invalidateQueries({ queryKey: ["user"] })
     },
     onError: (error) => {
-      setProfileMsg(error?.response?.data?.message || "Unable to update your profile. Please try again.")
+      setPasswordError(error?.response?.data?.message || "Unable to update your profile. Please try again.")
+      setPasswordSuccess("")
     }
   })
   const changePasswordMutation = useMutation({
     mutationFn: changePassword,
     onSuccess: (data) => {
-      setPasswordMessage(data?.message || "Password changed successfully.")
+      setPasswordSuccess(data?.message || "Password changed successfully.")
+      setPasswordError("")
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
       setIsChangingPass(false)
     },
     onError: (error) => {
-      setPasswordMessage(error?.response.data.message || "Unable to change your password. Please try again.")
+      setPasswordError(error?.response.data.message || "Unable to change your password. Please try again.")
+      setPasswordSuccess("")
     }
   })
   const handlePasswordChange = (event) => {
     event.preventDefault();
-    setPasswordMessage("")
+    setPasswordError("");
+    setPasswordSuccess("");
     if (newPassword !== confirmPassword) {
-      setPasswordMessage("New password do not match with the confirm password!")
-      return
+      setPasswordError("New password do not match with the confirm password!");
+      return;
     }
     changePasswordMutation.mutate({
       currentPassword, newPassword
@@ -88,7 +96,8 @@ const AccountPage = () => {
   }
   const handleProfileUpdate = (event) => {
     event.preventDefault()
-    setProfileMsg("")
+    setPasswordError("")
+    setPasswordSuccess("")
     if (!name.trim()) {
       setProfileMsg("Name connot be empty.")
       return
@@ -98,7 +107,8 @@ const AccountPage = () => {
 
   const handleVerifyAccount = (event) => {
     event.preventDefault();
-
+    setPasswordError("");
+    setPasswordSuccess("");
     if (!otp.trim()) {
       setMessage("Please enter the verification code sent to your email.");
       return;
@@ -216,9 +226,15 @@ const AccountPage = () => {
         </form>
       )}
 
-      {profileMsg && (
-        <p className="mt-3 text-sm text-[#526b57]">
-          {profileMsg}
+      {passwordSuccess && (
+        <p className="mt-4 text-sm text-emerald-700">
+          {passwordSuccess}
+        </p>
+      )}
+
+      {passwordError && (
+        <p className="mt-4 text-sm text-red-600">
+          {passwordError}
         </p>
       )}
 
@@ -336,9 +352,15 @@ const AccountPage = () => {
                       </form>
                     )
                   }
-                  {message && (
-                    <p className="mt-3 text-sm text-[#526b57]">
-                      {message}
+                  {passwordSuccess && (
+                    <p className="mt-4 text-sm text-emerald-700">
+                      {passwordSuccess}
+                    </p>
+                  )}
+
+                  {passwordError && (
+                    <p className="mt-4 text-sm text-red-600">
+                      {passwordError}
                     </p>
                   )}
                 </div>
@@ -355,7 +377,7 @@ const AccountPage = () => {
         <p className="mt-2 text-sm text-[#718077]">
           Keep your GreenGuru account secure.
         </p>
-        
+
         {
           !isChangingPass &&
           <button
@@ -454,12 +476,8 @@ const AccountPage = () => {
             </div>
           </form>
         )}
-
-        {passwordMessage && (
-          <p className="mt-4 text-sm text-[#526b57]">
-            {passwordMessage}
-          </p>
-        )}
+        {passwordSuccess && (<p className="mt-4 text-sm text-emerald-700">{passwordSuccess}</p>)}
+        {passwordError && (<p className="mt-4 text-sm text-red-600">{passwordError}</p>)}
       </section>
     </div>
   );
