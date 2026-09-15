@@ -4,6 +4,7 @@ node_modules/
 # Ignore environment variables
 .env
 .env.*
+server/.env
 !.env.example
 
 # Build outputs & logs
