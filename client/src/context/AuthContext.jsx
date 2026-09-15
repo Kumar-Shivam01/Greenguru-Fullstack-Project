@@ -36,6 +36,10 @@ export function AuthProvider({ children }) {
     }
     return response;
   };
+  const signup = async ()=>{
+
+    
+  }
 
   const logout = async () => {
     try {
@@ -59,6 +63,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
 export function useAuth() {
   return useContext(AuthContext);
 }
