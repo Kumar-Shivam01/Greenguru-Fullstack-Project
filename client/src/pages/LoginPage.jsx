@@ -53,7 +53,7 @@ function LoginPage() {
     };
 
     return (
-        <main className="min-h-screen flex items-stretch overflow-hidden bg-gradient-to-br from-emerald-50 via-stone-50 to-green-50">
+        <main className="min-h-screen flex items-stretch overflow-hidden bg-linear-to-br from-emerald-50 via-stone-50 to-green-50">
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden gradient-hero">
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute top-20 left-16 w-72 h-72 rounded-full bg-emerald-400 blur-3xl" />
@@ -266,7 +266,7 @@ function LoginPage() {
                         </button>
                     </div>
 
-                    <div className="text-center rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50/60 to-green-50/60 p-5">
+                    <div className="text-center rounded-2xl border border-emerald-100 bg-linear-to-r from-emerald-50/60 to-green-50/60 p-5">
                         <p className="text-sm text-forest-600">
                             New to GreenGuru?{" "}
                             <Link
