@@ -10,6 +10,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import PlantInfoPage from './../pages/PlantInfoPage'
 import PlantPreviewPage from "../pages/PlantPreviewPage";
 import AccountPage from './../pages/AccountPage'
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 
 function AppRoutes() {
   return (
@@ -21,6 +22,8 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route path="/register" element={<RegisterPage />} />
+
+      <Route path="/send-reset-otp" element={<ForgotPasswordPage />} />
 
       {/* Protected routes wrapped with authentication and layout */}
         <Route element={<ProtectedRoute />}>
