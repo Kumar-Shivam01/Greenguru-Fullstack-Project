@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { login as loginApi, logout as logoutApi,register as registerApi, getCurrentUser } from '../api/authApi'
+import { login as loginApi, logout as logoutApi,register as registerApi,sendResetPasswordOtp as sendResetOtp, getCurrentUser } from '../api/authApi'
 
 const AuthContext = createContext();
 
@@ -53,6 +53,10 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
+  const sendResetOtp = async(email)=>{
+    const response = await sendResetOtp(email)
+    return response
+  }
 
   return (
     <AuthContext.Provider
