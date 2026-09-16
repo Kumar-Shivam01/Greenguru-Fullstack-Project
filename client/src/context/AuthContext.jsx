@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { login as loginApi, logout as logoutApi, getCurrentUser } from '../api/authApi'
+import { login as loginApi, logout as logoutApi,register as registerApi, getCurrentUser } from '../api/authApi'
 
 const AuthContext = createContext();
 
@@ -36,9 +36,13 @@ export function AuthProvider({ children }) {
     }
     return response;
   };
-  const signup = async ()=>{
-
-    
+  const signup = async (formData)=>{
+    const response = await registerApi(formData)
+    if(response.status === 'success'){
+      setUser(response.data)
+      setLoading(false)
+    }
+    return response
   }
 
   const logout = async () => {
@@ -57,6 +61,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         logout,
+        signup
       }}
     >
       {children}
