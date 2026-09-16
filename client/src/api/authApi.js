@@ -2,7 +2,7 @@
 import axiosClient from './axiosClient'
 
 export const register = async(userData)=>{
-    const response = await axiosClient.post('/auth/register',userData)
+    const response = await axiosClient.post('/auth/register',userData,{withCredentials:true})
     return response.data
 }
 export const login = async (credentials) => {
