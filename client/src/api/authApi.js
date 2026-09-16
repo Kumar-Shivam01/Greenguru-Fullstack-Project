@@ -36,8 +36,8 @@ export const verifyAccount = async (otp) => {
 
 export const sendResetPasswordOtp = async (email) => {
     const response = await axiosClient.post("/auth/send-reset-otp", {
-        email,
-    });
+        email
+    },{withCredentials: true});
     return response.data;
 };
 
