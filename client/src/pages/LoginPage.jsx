@@ -182,13 +182,12 @@ function LoginPage() {
                                 >
                                     Password
                                 </label>
-                                <a
-                                    href="#"
-                                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-                                    onClick={(e) => e.preventDefault()}
+                                <Link
+                                    to="/send-reset-otp"
+                                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"    
                                 >
                                     Forgot password?
-                                </a>
+                                </Link>
                             </div>
                             <div className="relative group">
                                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-forest-400 group-focus-within:text-emerald-600 transition-colors">
