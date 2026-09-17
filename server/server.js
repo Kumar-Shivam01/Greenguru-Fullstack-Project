@@ -12,7 +12,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173','https://greenguru-fullstack-project.vercel.app'],
     credentials: true
 }))
 app.use(express.json()); //for parsing the req.body
