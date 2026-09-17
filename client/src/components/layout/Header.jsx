@@ -1,8 +1,22 @@
+import { useState } from "react";
 import { FiBell, FiSearch, FiSun, FiCalendar, FiFeather } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getNotifications } from "../../api/notificationApi";
+import NotificationPanel from "./NotificationPanel";
 
 function Header() {
     const { user } = useAuth();
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+    // Fetch notifications to get real-time unreadCount badge
+    const { data: notificationData } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: getNotifications,
+        refetchInterval: 60000, // Poll every minute in background
+    });
+
+    const unreadCount = notificationData?.unreadCount || 0;
 
     const firstName = user?.name?.split(" ")[0] || "there";
 
@@ -13,9 +27,12 @@ function Header() {
     });
 
     return (
-        <header className="relative h-28 border-b border-stone-200/60 bg-white/70 backdrop-blur-md overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-100/60 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
-            <div className="absolute top-0 left-1/3 w-48 h-48 bg-gradient-to-br from-green-100/40 to-transparent rounded-full -translate-y-1/2 blur-2xl" />
+        <header className="relative z-30 h-28 border-b border-stone-200/60 bg-white/70 backdrop-blur-md">
+            {/* Ambient Background Glows */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-100/60 to-transparent rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
+                <div className="absolute top-0 left-1/3 w-48 h-48 bg-gradient-to-br from-green-100/40 to-transparent rounded-full -translate-y-1/2 blur-2xl" />
+            </div>
 
             <div className="relative z-10 h-full flex items-center justify-between px-6 sm:px-10">
 
@@ -77,10 +94,31 @@ function Header() {
                         </div>
                     </div>
 
-                    <button className="relative group flex h-11 w-11 items-center justify-center rounded-2xl bg-white ring-1 ring-stone-200/60 text-stone-500 hover:ring-emerald-200 hover:bg-emerald-50/40 hover:text-emerald-700 transition-all">
-                        <FiBell className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
-                    </button>
+                    {/* Notification Bell Button & Dropdown Panel */}
+                    <div className="relative">
+                        <button
+                            data-notification-trigger="true"
+                            onClick={() => setIsNotificationOpen((prev) => !prev)}
+                            className={`relative group flex h-11 w-11 items-center justify-center rounded-2xl transition-all ${
+                                isNotificationOpen
+                                    ? "bg-emerald-50 ring-2 ring-emerald-400 text-emerald-800 shadow-md"
+                                    : "bg-white ring-1 ring-stone-200/60 text-stone-500 hover:ring-emerald-200 hover:bg-emerald-50/40 hover:text-emerald-700"
+                            }`}
+                            title="Notifications"
+                        >
+                            <FiBell className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white ring-2 ring-white shadow-xs animate-in zoom-in-50">
+                                    {unreadCount > 9 ? "9+" : unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        <NotificationPanel
+                            isOpen={isNotificationOpen}
+                            onClose={() => setIsNotificationOpen(false)}
+                        />
+                    </div>
 
                     <div className="hidden h-9 w-px bg-stone-200 sm:block" />
 
