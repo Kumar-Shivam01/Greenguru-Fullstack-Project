@@ -7,6 +7,7 @@ const plantRouter = require('./routes/plantRoutes')
 const { apiLimiter } = require('./middlewares/rateLimiter')
 const globalErrorHandler = require('./controllers/errorController')
 const cors = require('cors')
+const noticeRouter = require('./routes/notificationRoutes')
 require('dotenv').config();
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api', apiLimiter);
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/plants',plantRouter)
+app.use('/api/v1/notifications',noticeRouter)
 app.get('/', (req, res) => {
     res.send('GreenGuru API is running..')
 })
