@@ -3,6 +3,8 @@ import { FiBell, FiSearch, FiSun, FiCalendar, FiFeather } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { getNotifications } from "../../api/notificationApi";
+import { getMyPlants } from "../../api/plantApi";
+import { calculateGardenScore, getScoreTier } from "../../utils/gardenScore";
 import NotificationPanel from "./NotificationPanel";
 
 function Header() {
@@ -16,7 +18,18 @@ function Header() {
         refetchInterval: 60000, // Poll every minute in background
     });
 
+    // Fetch plants to dynamically calculate Garden Score (shares query cache with MyGardenPage)
+    const { data: plantsData } = useQuery({
+        queryKey: ["plants"],
+        queryFn: () => getMyPlants(),
+    });
+
+    const plants = plantsData?.data?.plants || [];
     const unreadCount = notificationData?.unreadCount || 0;
+
+    // Dynamically calculate Garden Score & tier styling
+    const gardenScore = calculateGardenScore(plants, user);
+    const tier = getScoreTier(gardenScore);
 
     const firstName = user?.name?.split(" ")[0] || "there";
 
@@ -80,16 +93,26 @@ function Header() {
                         </kbd>
                     </div>
 
-                    <div className="hidden sm:flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 ring-1 ring-emerald-100/60 px-4 py-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-xl gradient-hero text-white">
+                    {/* Dynamic Garden Score Badge */}
+                    <div
+                        title={`Garden Score: ${gardenScore}/100 • Status: ${tier.label}`}
+                        className={`hidden sm:flex items-center gap-2.5 rounded-2xl bg-gradient-to-r ${tier.bgGradient} ring-1 px-4 py-2.5 transition-all shadow-xs`}
+                    >
+                        <div className="flex h-7 w-7 items-center justify-center rounded-xl gradient-hero text-white shadow-xs">
                             <FiFeather className="h-3.5 w-3.5" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                                Garden Score
-                            </p>
-                            <p className="text-sm font-bold text-emerald-800 leading-none">
-                                87<span className="text-emerald-500 text-xs">/100</span>
+                            <div className="flex items-center gap-1.5">
+                                <p className={`text-[10px] font-bold uppercase tracking-wider ${tier.subColor}`}>
+                                    Garden Score
+                                </p>
+                                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${tier.badgeBg} leading-none`}>
+                                    {tier.label}
+                                </span>
+                            </div>
+                            <p className={`text-sm font-extrabold ${tier.textColor} leading-none mt-1`}>
+                                {gardenScore}
+                                <span className="text-stone-400 text-xs font-medium ml-0.5">/100</span>
                             </p>
                         </div>
                     </div>
