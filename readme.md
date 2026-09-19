@@ -1,5 +1,10 @@
 <p align="center">
   <img src="https://img.shields.io/badge/GreenGuru-🌿-22c55e?style=for-the-badge" alt="GreenGuru" />
+  
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-%23000000.svg?style=for-the-badge&logo=express&logoColor=white)
+![React](https://img.shields.io/badge/React-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Node.js](https://img.shields.io/badge/Node.js-%2343853d.svg?style=for-the-badge&logo=node.js&logoColor=white)
 </p>
 
 # 🌿 GreenGuru
