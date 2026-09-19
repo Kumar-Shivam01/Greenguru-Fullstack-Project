@@ -40,14 +40,5 @@ function AppRoutes() {
     </Routes>
   );
 }
-function TestDashboard() {
-  return (
-    <div className="p-10">
-      <h1 className="text-3xl font-semibold">
-        Protected Dashboard
-      </h1>
-    </div>
-  );
-}
 
 export default AppRoutes;
