@@ -341,25 +341,15 @@ All endpoints are prefixed with `/api/v1`.
 
 ## Screenshots
 
-> 📸 **Coming soon!** — Add screenshots of the app here.
->
-> Suggested screenshots to include:
-> 1. **Landing Page** — Hero section
-> 2. **Login / Register** — Auth forms
-> 3. **My Garden** — Dashboard with plant cards, filters, and Garden Score
-> 4. **Log Plant** — Image upload + AI identification results
-> 5. **Plant Detail** — Full plant info with care details, health timeline, and watering countdown
-> 6. **Health Check-in** — AI health assessment result
-> 7. **Notifications** — Smart notification panel
-> 8. **Account Settings** — Profile management and email verification
->
-> Place images in a `/screenshots` folder and update the paths below:
->
-> ```markdown
-> ![Landing Page](./screenshots/landing.png)
-> ![My Garden](./screenshots/garden.png)
-> ![Plant Detail](./screenshots/plant-detail.png)
-> ```
+
+### GreenGuru Landing Page
+<img src="./docs/screenshots/landing-page.png" width="500">
+
+### GreenGuru My Garden Page
+<img src="./docs/screenshots/garden-page.png" width="500">
+
+### GreenGuru Plant Detail Page
+<img src="./docs/screenshots/plant-detail-page.png" width="500">
 
 ---
 
@@ -367,29 +357,8 @@ All endpoints are prefixed with `/api/v1`.
 
 These features are **not yet implemented**:
 
-- [ ] **Push notifications** — Browser push or WebSocket real-time notifications (currently notifications are generated on fetch)
 - [ ] **Social sharing** — Share plant cards or garden scores with friends
-- [ ] **Plant care calendar** — Visual calendar view of watering schedules
-- [ ] **Multi-image uploads** — Upload multiple photos per plant for richer identification
 - [ ] **Community / explore** — Browse other users' plants and care tips
 - [ ] **Dark mode** — Theme toggle for the UI
 
----
-
-## Contributing
-
-Contributions are welcome! Here's how to get started:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-Please make sure to:
-- Follow existing code style and project structure
-- Add comments for complex logic
-- Test your changes before submitting
-
----
 
