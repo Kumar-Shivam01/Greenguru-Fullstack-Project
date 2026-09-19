@@ -108,8 +108,7 @@ exports.EMAIL_VERIFY_TEMPLATE = `<!DOCTYPE html>
         <table role="presentation" class="email-container" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px;">
           <tr>
             <td align="center" style="padding: 24px 20px; font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#9ca3af;">
-              © {{currentYear}} YourApp Inc. All rights reserved.<br>
-              123 Main Street, City, Country
+              © {{currentYear}} GreenGuru. All rights reserved.
             </td>
           </tr>
         </table>
@@ -231,8 +230,7 @@ exports.RESET_PASSWORD_TEMPLATE =`<!DOCTYPE html>
         <table role="presentation" class="email-container" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px;">
           <tr>
             <td align="center" style="padding: 24px 20px; font-family: Arial, Helvetica, sans-serif; font-size:12px; color:#9ca3af;">
-              © {{currentYear}} YourApp Inc. All rights reserved.<br>
-              123 Main Street, City, Country
+              © {{currentYear}} GreenGuru. All rights reserved.
             </td>
           </tr>
         </table>
