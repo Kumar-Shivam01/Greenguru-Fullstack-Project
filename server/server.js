@@ -12,7 +12,17 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-    origin: ['http://localhost:5173','https://greenguru-fullstack-project.vercel.app'],
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'https://greenguru-fullstack-project.vercel.app'
+        ];
+        if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }))
 app.use(express.json()); //for parsing the req.body
