@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import MyGardenPage from "../pages/MyGardenPage";
 import LogPlantPage from "../pages/LogPlantPage";
-import ProfilePage from "../pages/ProfilePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
@@ -32,7 +31,6 @@ function AppRoutes() {
             <Route path="/plants/:id" element={<PlantInfoPage />} />
             <Route path="/plants/new" element={<LogPlantPage />}/>
             <Route path="/plants/new/preview" element={<PlantPreviewPage />}/>
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/account" element={<AccountPage />} />
           </Route>
         </Route> 
