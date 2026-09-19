@@ -17,6 +17,19 @@ const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET_STR, { expiresIn: process.env.JWT_EXPIRE })
 }
 
+const getCookieOptions = (req) => {
+    const host = req?.headers?.host || '';
+    const origin = req?.headers?.origin || '';
+    const isLocal = host.includes('localhost') || host.includes('127.0.0.1') || origin.includes('localhost') || origin.includes('127.0.0.1');
+    const isProduction = process.env.NODE_ENV === 'production' && !isLocal;
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        maxAge: ms(process.env.JWT_EXPIRE)
+    };
+}
+
 exports.register = asyncErrorHandler(async (req, res,next) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return next(new CustomError('Please provide you name, email and password for signup.', 400))
@@ -26,12 +39,7 @@ exports.register = asyncErrorHandler(async (req, res,next) => {
 
     const user = await User.create(req.body);
     const token = signToken(user._id)
-    res.cookie('rememberme', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' ? true : false,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // important for cookies to work in different domains
-        maxAge: ms(process.env.JWT_EXPIRE)
-    })
+    res.cookie('rememberme', token, getCookieOptions(req))
 
     await sendEmail({
         email: email,
@@ -57,12 +65,7 @@ exports.login = asyncErrorHandler(async (req, res,next) => {
         return next(new CustomError('Incorrect email or password.', 401))
 
     const token = signToken(user._id);
-    res.cookie('rememberme', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' ? true : false,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge: ms(process.env.JWT_EXPIRE)
-    })
+    res.cookie('rememberme', token, getCookieOptions(req))
 
     res.status(200).json({
         status: 'success',
@@ -74,10 +77,11 @@ exports.login = asyncErrorHandler(async (req, res,next) => {
     })
 })
 exports.logout = asyncErrorHandler(async (req, res, next) => {
+    const { httpOnly, secure, sameSite } = getCookieOptions(req);
     res.clearCookie('rememberme', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production' ? true : false,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        httpOnly,
+        secure,
+        sameSite,
     })
     res.status(200).json({
         status: 'success',
