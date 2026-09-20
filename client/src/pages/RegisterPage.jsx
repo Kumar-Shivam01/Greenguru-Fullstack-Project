@@ -83,7 +83,7 @@ function RegisterPage() {
                                 <span className="block text-emerald-300">green paradise</span>
                             </h2>
                             <p className="text-lg text-white/75 leading-relaxed">
-                                Join thousands of plant parents who keep their plants happy and healthy with smart AI-powered care guidance.
+                                Join plant parents who keep their plants happy and healthy with smart AI-powered care guidance.
                             </p>
                         </div>
 

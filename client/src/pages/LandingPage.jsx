@@ -1106,7 +1106,7 @@ export default function LandingPage() {
             </h2>
 
             <p className="text-slate-300 text-sm sm:text-base mt-4 leading-relaxed">
-              Join thousands of enthusiastic plant parents diagnosing pests, logging care histories, and keeping botanical collections thriving effortlessly.
+              Join enthusiastic plant parents diagnosing pests, logging care histories, and keeping botanical collections thriving effortlessly.
             </p>
 
             {/* Email Form */}
