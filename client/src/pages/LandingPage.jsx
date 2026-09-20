@@ -329,8 +329,8 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl"
             >
-              Proprietary computer vision models diagnose foliar pathogens, severe pest infestations,
-              and hydration stress in under 2 seconds. Receive clinical botanical care plans to revive your collection.
+              Proprietary Gemini Vision model diagnose foliar pathogens, severe pest infestations,
+              and hydration stress in under few seconds. Receive clinical botanical care plans to revive your collection.
             </motion.p>
 
             {/* CTA Group */}
@@ -375,16 +375,14 @@ export default function LandingPage() {
               className="mt-12 pt-8 border-t border-white/10 grid grid-cols-3 gap-6 w-full max-w-lg"
             >
               <div>
-                <div className="text-2xl font-black text-white">99.4%</div>
+                <div className="text-2xl font-black text-white">99%</div>
                 <div className="text-xs text-slate-400 mt-1">Diagnostic Accuracy</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-emerald-400">1.2s</div>
+                <div className="text-2xl font-black text-emerald-400">In seconds</div>
                 <div className="text-xs text-slate-400 mt-1">Vision Inference</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-white">150k+</div>
-                <div className="text-xs text-slate-400 mt-1">Plants Healed</div>
               </div>
             </motion.div>
           </div>
@@ -460,7 +458,6 @@ export default function LandingPage() {
                   <span className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE TELEMETRY
                   </span>
-                  <span>AI_MODEL: v4.8_BIO</span>
                 </div>
               </div>
 
@@ -533,7 +530,7 @@ export default function LandingPage() {
               Inspect Real Pathogen & Health Cases
             </h2>
             <p className="text-slate-300 text-sm sm:text-base mt-3">
-              Click through different simulated plant telemetry scans to see how GreenGuru’s multimodal neural network diagnoses issues and prescribes targeted treatment protocols.
+              Click through different simulated plant telemetry scans to see how GreenGuru diagnoses issues and prescribes targeted treatment protocols.
             </p>
 
             {/* Clickable Tabs */}
@@ -615,9 +612,6 @@ export default function LandingPage() {
 
                 {/* HUD Camera Framing */}
                 <div className="absolute inset-4 border border-dashed border-white/20 rounded-xl pointer-events-none" />
-                <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-mono text-slate-300">
-                  SCAN_FPS: 60 • SPECTRAL: BIO-RGB
-                </div>
               </div>
 
               {/* HUD Diagnosis Details Card */}
@@ -647,12 +641,6 @@ export default function LandingPage() {
 
                   {/* Confidence Bar */}
                   <div className="mt-5">
-                    <div className="flex justify-between text-xs text-slate-400 mb-1.5 font-mono">
-                      <span>Neural Analysis Reliability</span>
-                      <span className="text-emerald-300 font-bold">
-                        {demoCases[activeTab].confidence}%
-                      </span>
-                    </div>
                     <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
@@ -716,7 +704,7 @@ export default function LandingPage() {
             Everything You Need to Keep Plants Thriving
           </h2>
           <p className="text-slate-300 text-sm sm:text-base mt-3">
-            Engineered by horticulturists and powered by cutting-edge Gemini Vision models to automate garden maintenance and disease remediation.
+            Powered by cutting-edge Gemini Vision model to automate garden maintenance and disease remediation.
           </p>
         </div>
 
@@ -731,12 +719,12 @@ export default function LandingPage() {
                 AI Plant Diagnosis
               </h3>
               <p className="text-sm text-slate-300 mt-3 leading-relaxed">
-                Scan leaf foliage with your camera. Our multimodal network detects microbial blights, chlorosis, fungal rust, and pest infestation with over 99% taxonomic accuracy.
+                Scan leaf foliage with your camera. Our network detects microbial blights, chlorosis, fungal rust, and pest infestation with over 94% taxonomic accuracy.
               </p>
             </div>
             <ul className="mt-6 pt-6 border-t border-white/10 space-y-2.5 text-xs text-slate-400">
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> Multi-spectral symptom mapping
+                <Check className="w-3.5 h-3.5 text-emerald-400" /> AI-assisted symptom detection using photo analysis
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" /> Immediate organic remediation steps
@@ -791,7 +779,7 @@ export default function LandingPage() {
                 <Check className="w-3.5 h-3.5 text-emerald-400" /> 7-Factor custom care metrics
               </li>
               <li className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> ASPCA pet safety database
+                <Check className="w-3.5 h-3.5 text-emerald-400" /> Pet safety advisories
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-400" /> Location tagging & room presets
@@ -813,7 +801,7 @@ export default function LandingPage() {
               Your Garden at a Single Glance
             </h2>
             <p className="text-slate-300 text-sm sm:text-base mt-3">
-              Manage your indoor greenery collection with instant health telemetry, location filters, and real-time watering timers.
+              Manage your greenery collection with instant health telemetry, location filters, and real-time watering timers.
             </p>
           </div>
 
@@ -1154,7 +1142,7 @@ export default function LandingPage() {
               Green<span className="text-emerald-400">Guru</span>
             </span>
             <span className="text-xs text-slate-500 ml-2">
-              © 2026 GreenGuru Inc. Built with love for indoor plant parents.
+              © 2026 GreenGuru Inc. Built with love for plant parents.
             </span>
           </div>
 
@@ -1195,7 +1183,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
                 <h4 className="text-base font-bold text-white flex items-center gap-2">
                   <Play className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-                  GreenGuru Vision Engine Walkthrough (3m 32s)
+                  GreenGuru Walkthrough (3m 10s)
                 </h4>
                 <button
                   onClick={() => setVideoModalOpen(false)}
@@ -1222,7 +1210,7 @@ export default function LandingPage() {
               </div>
 
               <p className="text-xs text-slate-400 mt-4 leading-relaxed">
-                Demonstrating real-time photo ingestion, multimodal Gemini 3.5 Flash spectral leaf analysis, and 1-click garden hub care scheduling.
+                Demonstrating real-time photo ingestion, Gemini 3.5 Flash spectral leaf analysis, and 1-click garden hub care scheduling.
               </p>
             </motion.div>
           </motion.div>
